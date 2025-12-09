@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsletter SaaS - La Solution Marketing Ultime</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --primary: #4f46e5; --text: #1f2937; --bg: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+        
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; max-width: 1200px; margin: 0 auto; }
+        /* Logo cliquable */
+        .logo { font-weight: 800; font-size: 1.5rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-links a { text-decoration: none; color: #4b5563; font-weight: 600; margin-left: 20px; transition: 0.2s; }
+        .nav-links a:hover { color: var(--primary); }
+        .btn-nav { background: var(--primary); color: white !important; padding: 10px 20px; border-radius: 8px; }
+        .btn-nav:hover { opacity: 0.9; }
+
+        .hero { text-align: center; padding: 80px 20px; max-width: 800px; margin: 0 auto; }
+        h1 { font-size: 3.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 20px; background: linear-gradient(135deg, #4f46e5, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.2rem; color: #6b7280; margin-bottom: 40px; }
+        .cta-button { display: inline-block; background: #111827; color: white; padding: 18px 35px; border-radius: 50px; font-size: 1.1rem; font-weight: 600; text-decoration: none; transition: transform 0.2s; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); }
+        .cta-button:hover { transform: translateY(-3px); }
+
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; margin: 60px auto; padding: 20px; }
+        .feature-card { background: white; padding: 30px; border-radius: 16px; border: 1px solid #e5e7eb; transition: 0.2s; }
+        .feature-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .icon-box { width: 50px; height: 50px; background: #eef2ff; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.5rem; margin-bottom: 20px; }
+        h3 { font-size: 1.3rem; margin: 0 0 10px 0; }
+        .desc { color: #6b7280; line-height: 1.6; }
+
+        .pricing-section { background: white; padding: 80px 20px; text-align: center; border-top: 1px solid #e5e7eb; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 1000px; margin: 50px auto 0; }
+        .price-card { border: 1px solid #e5e7eb; padding: 40px; border-radius: 16px; position: relative; }
+        .price-card.popular { border: 2px solid var(--primary); background: #fdfbff; transform: scale(1.05); z-index: 10; }
+        .price-tag { font-size: 2.5rem; font-weight: 800; color: var(--text); margin: 20px 0; }
+        .price-sub { font-size: 0.9rem; color: #6b7280; }
+        .features-list { list-style: none; padding: 0; margin: 30px 0; text-align: left; }
+        .features-list li { margin-bottom: 12px; color: #4b5563; }
+        .features-list i { color: #10b981; margin-right: 10px; }
+
+        footer { text-align: center; padding: 40px; color: #9ca3af; font-size: 0.9rem; border-top: 1px solid #e5e7eb; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="/landing" class="logo"><i class="fa-solid fa-paper-plane"></i> Newsletter SaaS</a>
+        
+        <div class="nav-links">
+            <a href="/login">Se connecter</a>
+            <a href="/register" class="btn-nav">Commencer (Gratuit)</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Vos campagnes emailing,<br>propulsées par l'IA.</h1>
+        <p>Importez vos contacts, laissez l'IA rédiger pour vous et envoyez des milliers de mails en un clic. Simple, rapide et sans abonnement mensuel.</p>
+        <a href="/register" class="cta-button">Obtenir 50 crédits offerts 🚀</a>
+        <p style="font-size: 0.9rem; margin-top: 15px; color: #10b981;"><i class="fa-solid fa-check"></i> Pas de carte bancaire requise</p>
+    </section>
+
+    <section class="features">
+        <div class="feature-card">
+            <div class="icon-box"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <h3>Rédaction par IA</h3>
+            <p class="desc">Plus jamais de page blanche. Notre IA génère des sujets accrocheurs et rédige le contenu en HTML pour vous en quelques secondes.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon-box"><i class="fa-solid fa-file-import"></i></div>
+            <h3>Import Intelligent</h3>
+            <p class="desc">Importez vos contacts depuis un fichier Excel ou PDF. Le système détecte automatiquement les emails et les noms.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon-box"><i class="fa-regular fa-eye"></i></div>
+            <h3>Tracking Précis</h3>
+            <p class="desc">Sachez exactement qui lit vos emails grâce à notre pixel espion intégré. Optimisez votre taux d'ouverture.</p>
+        </div>
+    </section>
+
+    <section class="pricing-section">
+        <h2 style="font-size: 2.5rem; margin-bottom: 10px;">Payez uniquement ce que vous envoyez</h2>
+        <p>Pas d'abonnement caché. Vos crédits sont valables à vie.</p>
+
+        <div class="pricing-grid">
+            <div class="price-card">
+                <h3>Starter</h3>
+                <div class="price-tag">3 000 F</div>
+                <div class="price-sub">Pour débuter</div>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-check"></i> 500 Emails</li>
+                    <li><i class="fa-solid fa-check"></i> IA Incluse</li>
+                    <li><i class="fa-solid fa-check"></i> Support standard</li>
+                </ul>
+                <a href="/register" style="display:block; padding:10px; border:1px solid #ccc; text-decoration:none; color:#333; border-radius:8px; font-weight:600;">Choisir</a>
+            </div>
+
+            <div class="price-card popular">
+                <div style="position:absolute; top:-15px; left:50%; transform:translateX(-50%); background:var(--primary); color:white; padding:5px 15px; border-radius:20px; font-size:0.8rem; font-weight:bold;">POPULAIRE</div>
+                <h3 style="color:var(--primary);">Pro</h3>
+                <div class="price-tag">10 000 F</div>
+                <div class="price-sub">Meilleur rapport qualité/prix</div>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-check"></i> 2 000 Emails</li>
+                    <li><i class="fa-solid fa-check"></i> IA Illimitée</li>
+                    <li><i class="fa-solid fa-check"></i> Tracking avancé</li>
+                    <li><i class="fa-solid fa-check"></i> Pièces jointes</li>
+                </ul>
+                <a href="/register" style="display:block; padding:12px; background:var(--primary); text-decoration:none; color:white; border-radius:8px; font-weight:600;">Choisir</a>
+            </div>
+
+            <div class="price-card">
+                <h3>Business</h3>
+                <div class="price-tag">20 000 F</div>
+                <div class="price-sub">Pour les pros</div>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-check"></i> 5 000 Emails</li>
+                    <li><i class="fa-solid fa-check"></i> Prioritaire</li>
+                    <li><i class="fa-solid fa-check"></i> Tout illimité</li>
+                </ul>
+                <a href="/register" style="display:block; padding:10px; border:1px solid #ccc; text-decoration:none; color:#333; border-radius:8px; font-weight:600;">Choisir</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        &copy; 2025 Newsletter SaaS. Tous droits réservés. <br>
+        Fait avec ❤️ par Gabriel.
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Inscription - Newsletter Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; position: relative; }
+        .card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; }
+        h1 { margin-bottom: 20px; color: #1e293b; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #059669; }
+        .link { margin-top: 15px; display: block; color: #64748b; text-decoration: none; font-size: 0.9rem; }
+
+        /* STYLE BOUTON RETOUR */
+        .back-btn { position: absolute; top: 30px; left: 30px; text-decoration: none; color: #64748b; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .back-btn:hover { color: #10b981; transform: translateX(-3px); }
+    </style>
+</head>
+<body>
+
+    <a href="/landing" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour à l'accueil</a>
+
+    <div class="card">
+        <h1>Créer un compte</h1>
+        <p style="color: #64748b; margin-bottom: 20px;">Obtenez 50 crédits d'envoi offerts.</p>
+        <input type="email" id="email" placeholder="Votre Email">
+        <input type="password" id="pass" placeholder="Mot de passe">
+        <button onclick="register()">S'inscrire</button>
+        <a href="/login" class="link">Déjà un compte ? Se connecter</a>
+    </div>
+
+    <script>
+        async function register() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('pass').value;
+            
+            if(!email || !password) return alert("Remplissez tout !");
+
+            const res = await fetch('/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                alert("Compte créé ! Connectez-vous maintenant.");
+                window.location.href = '/login';
+            } else {
+                alert("Erreur : " + data.error);
+            }
+        }
+    </script>
+</body>
+</html>

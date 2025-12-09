@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion - Newsletter Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; position: relative; }
+        .card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; }
+        h1 { margin-bottom: 20px; color: #1e293b; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        button:hover { background: #4338ca; }
+        .link { margin-top: 15px; display: block; color: #64748b; text-decoration: none; font-size: 0.9rem; }
+        .back-btn { position: absolute; top: 30px; left: 30px; text-decoration: none; color: #64748b; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .back-btn:hover { color: #4f46e5; transform: translateX(-3px); }
+    </style>
+</head>
+<body>
+
+    <a href="/landing" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour à l'accueil</a>
+
+    <div class="card">
+        <h1>Connexion</h1>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="pass" placeholder="Mot de passe">
+        <button onclick="login()">Se connecter</button>
+        <a href="/register" class="link">Pas de compte ? S'inscrire</a>
+    </div>
+
+    <script>
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('pass').value;
+            
+            const res = await fetch('/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('credits', data.credits);
+                localStorage.setItem('opens', data.opens || 0);
+                // SAUVEGARDE DU STATUT ADMIN
+                localStorage.setItem('isAdmin', data.isAdmin);
+                
+                window.location.href = '/'; 
+            } else {
+                alert(data.error);
+            }
+        }
+    </script>
+</body>
+</html>
