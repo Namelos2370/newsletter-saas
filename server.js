@@ -22,19 +22,17 @@ const app = express();
 
 // --- 1. CONFIGURATION ---
 
-// Sécurité de base
 if (!process.env.JWT_SECRET) {
-    console.error("🔥 ERREUR CRITIQUE : JWT_SECRET manquant dans les variables d'environnement !");
-    // On ne coupe pas le processus pour laisser Render afficher les logs, mais ça ne marchera pas bien.
+    console.error("🔥 ERREUR : JWT_SECRET manquant dans .env");
+    // On ne coupe pas le processus pour laisser Render afficher les logs
 }
 
 const uploadDir = 'uploads';
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-// Connexion MongoDB avec logs détaillés
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ Connecté à MongoDB'))
-    .catch(err => console.error('❌ Erreur Connexion MongoDB:', err));
+    .catch(err => console.error('❌ Erreur MongoDB:', err));
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -199,7 +197,7 @@ app.post('/api/settings/smtp', authenticateToken, async (req, res) => {
     try {
         const { smtpUser, smtpPass } = req.body;
         await User.findByIdAndUpdate(req.user.id, { smtpUser, smtpPass });
-        res.json({ success: true, message: "Sauvegardé !" });
+        res.json({ success: true, message: "Configuration Gmail sauvegardée !" });
     } catch (e) { res.status(500).json({ error: "Erreur sauvegarde" }); }
 });
 
@@ -257,7 +255,7 @@ app.post('/generate-content', authenticateToken, async (req, res) => {
 });
 
 
-// --- 6. ENVOI EMAIL (AVEC DEBUGGING LOGS) ---
+// --- 6. ENVOI EMAIL (LOGIQUE INTELLIGENTE) ---
 app.post('/send-mail', authenticateToken, upload.single('attachment'), async (req, res) => {
     let recipients;
     try { recipients = JSON.parse(req.body.recipients); } catch (e) { return res.status(400).json({ error: "Erreur destinataires" }); }
@@ -266,59 +264,75 @@ app.post('/send-mail', authenticateToken, upload.single('attachment'), async (re
     if (!user) return res.status(404).json({ error: "Inconnu" });
     if (user.credits < recipients.length) return res.status(403).json({ error: "Crédits insuffisants" });
 
-    // CONFIG SMTP
-    let smtpConfig;
-    if (user.smtpUser && user.smtpPass) {
-        smtpConfig = { user: user.smtpUser, pass: user.smtpPass };
-    } else {
-        // Fallback système : Vérification que les variables existent
-        if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
-            console.error("❌ ERREUR CRITIQUE : GMAIL_USER ou GMAIL_PASS manquant sur le serveur !");
-            return res.status(500).json({ error: "Erreur configuration serveur (SMTP)" });
-        }
-        smtpConfig = { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS };
-    }
-    
-    let transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: smtpConfig
-    });
+    // --- CONFIGURATION SMTP INTELLIGENTE ---
+    let transporter;
+    let fromAddress;
+    let replyToAddress;
 
+    // CAS 1 : SMTP Perso (Paramètres)
+    if (user.smtpUser && user.smtpPass) {
+        transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: { user: user.smtpUser, pass: user.smtpPass }
+        });
+        fromAddress = user.smtpUser;
+        replyToAddress = user.smtpUser;
+    } 
+    // CAS 2 : Système par défaut (Brevo)
+    else {
+        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+            console.error("❌ CRITIQUE : Variables SMTP système manquantes sur Render (SMTP_USER/SMTP_PASS).");
+            return res.status(500).json({ error: "Serveur d'envoi non configuré." });
+        }
+
+        transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
+            port: parseInt(process.env.SMTP_PORT || "587"),
+            secure: false, // true pour 465, false pour les autres ports
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            }
+        });
+
+        // "De la part de..." + Réponse vers l'utilisateur
+        fromAddress = `"Via Newsletter" <${process.env.SMTP_USER}>`; 
+        replyToAddress = user.email; 
+    }
+
+    const trackingPixel = `<img src="${req.protocol}://${req.get('host')}/track/${user._id}" width="1" height="1" style="display:none;" />`;
     let successCount = 0;
     let errorCount = 0;
-    const trackingPixel = `<img src="${req.protocol}://${req.get('host')}/track/${user._id}" width="1" height="1" style="display:none;" />`;
 
-    console.log(`📧 Démarrage envoi pour ${user.email} vers ${recipients.length} destinataires via ${smtpConfig.user}...`);
+    console.log(`📧 Démarrage envoi pour ${user.email} (SMTP Perso: ${!!user.smtpUser})`);
 
     for (const contact of recipients) {
         try {
             await transporter.sendMail({
-                from: `"Newsletter" <${smtpConfig.user}>`,
+                from: fromAddress,
+                replyTo: replyToAddress, // La réponse va chez l'utilisateur
                 to: contact.email,
                 subject: req.body.subject,
                 html: req.body.message.replace(/{{nom}}/gi, contact.name || '').replace(/Bonjour\s?,/gi, 'Bonjour,') + trackingPixel,
                 attachments: req.file ? [{ filename: req.file.originalname, path: req.file.path }] : []
             });
             successCount++;
-            console.log(`✅ Succès vers ${contact.email}`); // Log succès
-            await new Promise(r => setTimeout(r, 1000));
+            console.log(`✅ OK: ${contact.email}`);
+            await new Promise(r => setTimeout(r, 500)); // Pause anti-spam
         } catch (error) { 
-            // --- LOG ERREUR PRÉCIS ---
-            console.error(`❌ ÉCHEC vers ${contact.email} :`, error.message);
-            if(error.response) console.error("   Détail SMTP:", error.response);
+            console.error(`❌ ERREUR vers ${contact.email}:`, error.message);
             errorCount++; 
         }
     }
 
-    console.log(`🏁 Fin envoi. Succès: ${successCount}, Erreurs: ${errorCount}`);
-
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-    
+
     if (successCount > 0) {
         user.credits -= successCount;
         await user.save();
         if(Campaign) try { await new Campaign({ userId: user._id, subject: req.body.subject, recipientCount: successCount }).save(); } catch(e) {}
     }
+    
     res.json({ success: true, count: successCount, errors: errorCount, newCredits: user.credits, currentOpens: user.opens });
 });
 
