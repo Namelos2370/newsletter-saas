@@ -16,16 +16,12 @@ const path = require('path');
 const User = require('./models/User');
 const Feedback = require('./models/Feedback');
 let Campaign;
-try { Campaign = require('./models/Campaign'); } catch (e) { console.log("⚠️ Note: Historique désactivé (fichier manquant)."); }
+try { Campaign = require('./models/Campaign'); } catch (e) { console.log("⚠️ Note: Historique désactivé."); }
 
 const app = express();
 
-// --- 1. CONFIGURATION ---
-
-if (!process.env.JWT_SECRET) {
-    console.error("🔥 ERREUR : JWT_SECRET manquant dans .env");
-    // On ne coupe pas le processus pour laisser Render afficher les logs
-}
+// --- CONFIGURATION ---
+if (!process.env.JWT_SECRET) console.error("🔥 ERREUR : JWT_SECRET manquant");
 
 const uploadDir = 'uploads';
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
@@ -46,13 +42,11 @@ const upload = multer({ storage: storage });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 
-// --- 2. MIDDLEWARES ---
-
+// --- MIDDLEWARES ---
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) return res.status(401).json({ error: "Non connecté." });
-
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) return res.status(403).json({ error: "Session expirée." });
         req.user = user;
@@ -62,15 +56,139 @@ function authenticateToken(req, res, next) {
 
 function requireAdmin(req, res, next) {
     const admins = (process.env.ADMIN_EMAIL || "").split(',').map(e => e.trim());
-    if (!admins.includes(req.user.email)) {
-        return res.status(403).json({ error: "Accès interdit." });
-    }
+    if (!admins.includes(req.user.email)) return res.status(403).json({ error: "Accès interdit." });
     next();
 }
 
 
-// --- 3. ROUTES PUBLIQUES ---
+// --- ROUTES ---
 
+// IA VERSION COPYWRITER MARKETING (NOUVEAU)
+app.post('/generate-content', authenticateToken, async (req, res) => {
+    try {
+        const systemPrompt = `
+            Tu es un Expert Copywriter Marketing de classe mondiale.
+            Ton objectif : Rédiger une newsletter qui convertit, engage et vend.
+            
+            RÈGLES DE RÉDACTION :
+            1. Utilise la méthode AIDA (Attention, Intérêt, Désir, Action).
+            2. Ton : Professionnel mais chaleureux, engageant, avec quelques emojis bien placés.
+            3. Structure : Paragraphes courts, phrases percutantes.
+            4. Formatage : Utilise des balises HTML simples (<p>, <strong>, <br>, <ul>, <li>).
+            5. Variable : Utilise {{nom}} de façon naturelle si besoin.
+            
+            FORMAT DE RÉPONSE ATTENDU (JSON STRICT) :
+            {
+                "subject": "Un objet de mail irrésistible et court (max 60 caractères)",
+                "body": "Le contenu HTML du mail..."
+            }
+        `;
+
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: `Sujet de la newsletter : "${req.body.topic}".` }
+            ],
+        });
+        
+        let content = completion.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
+        res.json(JSON.parse(content));
+    } catch (error) { 
+        console.error("Erreur IA:", error);
+        res.status(500).json({ error: "L'IA est surchargée, réessayez." }); 
+    }
+});
+
+// ENVOI EMAIL RÉPARÉ (Utilisation de SENDER_EMAIL)
+app.post('/send-mail', authenticateToken, upload.single('attachment'), async (req, res) => {
+    let recipients;
+    try { 
+        // Nettoyage de la liste pour éviter les erreurs
+        recipients = JSON.parse(req.body.recipients).map(c => ({
+            email: c.email.trim(),
+            name: c.name ? c.name.trim() : ''
+        })).filter(c => c.email.includes('@'));
+    } catch (e) { return res.status(400).json({ error: "Liste de destinataires invalide" }); }
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "Inconnu" });
+    if (user.credits < recipients.length) return res.status(403).json({ error: "Crédits insuffisants" });
+
+    // --- CONFIGURATION SMTP ---
+    let transporter;
+    let fromAddress;
+    let replyToAddress;
+
+    // CAS 1 : SMTP Perso
+    if (user.smtpUser && user.smtpPass) {
+        transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: { user: user.smtpUser, pass: user.smtpPass }
+        });
+        fromAddress = user.smtpUser;
+        replyToAddress = user.smtpUser;
+    } 
+    // CAS 2 : Système par défaut (Mailjet/Brevo)
+    else {
+        // Vérif des variables
+        if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.SENDER_EMAIL) {
+            console.error("❌ ERREUR CONFIG : SENDER_EMAIL ou SMTP credentials manquants sur Render.");
+            return res.status(500).json({ error: "Erreur serveur : L'email système n'est pas configuré." });
+        }
+
+        transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || "in-v3.mailjet.com",
+            port: parseInt(process.env.SMTP_PORT || "587"),
+            secure: false,
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            }
+        });
+
+        // C'EST ICI LA RÉPARATION MAJEURE :
+        // "from" doit être l'email validé (SENDER_EMAIL), pas la clé API.
+        fromAddress = `"Newsletter" <${process.env.SENDER_EMAIL}>`; 
+        replyToAddress = user.email; // Les réponses vont au client
+    }
+
+    const trackingPixel = `<img src="${req.protocol}://${req.get('host')}/track/${user._id}" width="1" height="1" style="display:none;" />`;
+    let successCount = 0;
+    let errorCount = 0;
+
+    console.log(`📧 Envoi ${recipients.length} mails. From: ${fromAddress}, ReplyTo: ${replyToAddress}`);
+
+    for (const contact of recipients) {
+        try {
+            await transporter.sendMail({
+                from: fromAddress,
+                replyTo: replyToAddress,
+                to: contact.email,
+                subject: req.body.subject,
+                html: req.body.message.replace(/{{nom}}/gi, contact.name || '').replace(/Bonjour\s?,/gi, 'Bonjour,') + trackingPixel,
+                attachments: req.file ? [{ filename: req.file.originalname, path: req.file.path }] : []
+            });
+            successCount++;
+            await new Promise(r => setTimeout(r, 500));
+        } catch (error) { 
+            console.error(`❌ Échec vers ${contact.email}:`, error.message);
+            errorCount++; 
+        }
+    }
+
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+
+    if (successCount > 0) {
+        user.credits -= successCount;
+        await user.save();
+        if(Campaign) try { await new Campaign({ userId: user._id, subject: req.body.subject, recipientCount: successCount }).save(); } catch(e) {}
+    }
+    
+    res.json({ success: true, count: successCount, errors: errorCount, newCredits: user.credits, currentOpens: user.opens });
+});
+
+// AUTRES ROUTES (Inchies)
 app.get('/track/:userId', async (req, res) => {
     try { await User.findByIdAndUpdate(req.params.userId, { $inc: { opens: 1 } }); } catch (e) {}
     const img = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
@@ -95,17 +213,12 @@ app.post('/auth/login', async (req, res) => {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
         if (!user || !(await bcrypt.compare(password, user.password))) return res.status(400).json({ error: "Identifiants incorrects" });
-        
         const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '24h' });
         const admins = (process.env.ADMIN_EMAIL || "").split(',').map(e => e.trim());
         const isAdmin = admins.includes(user.email);
-
         res.json({ success: true, token, credits: user.credits, opens: user.opens || 0, isAdmin });
     } catch (e) { res.status(500).json({ error: "Erreur serveur" }); }
 });
-
-
-// --- 4. MODULE ADMIN ---
 
 app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) => {
     try {
@@ -153,13 +266,10 @@ app.get('/api/admin/feedbacks', authenticateToken, requireAdmin, async (req, res
     } catch (e) { res.status(500).json({ error: "Erreur feedbacks" }); }
 });
 
-
-// --- 5. FEATURES UTILISATEUR ---
-
 app.post('/api/assist', authenticateToken, async (req, res) => {
     const { question } = req.body;
     try {
-        const systemContext = `Tu es l'assistant de Newsletter Studio. Réponds brièvement. Tarifs: Starter(3000F/500), Pro(10000F/2000).`;
+        const systemContext = `Tu es l'assistant de Newsletter Studio. Réponds brièvement.`;
         const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [{ role: "system", content: systemContext }, { role: "user", content: question }],
@@ -197,7 +307,7 @@ app.post('/api/settings/smtp', authenticateToken, async (req, res) => {
     try {
         const { smtpUser, smtpPass } = req.body;
         await User.findByIdAndUpdate(req.user.id, { smtpUser, smtpPass });
-        res.json({ success: true, message: "Configuration Gmail sauvegardée !" });
+        res.json({ success: true, message: "Sauvegardé !" });
     } catch (e) { res.status(500).json({ error: "Erreur sauvegarde" }); }
 });
 
@@ -239,101 +349,6 @@ app.post('/extract-file', authenticateToken, upload.single('file'), async (req, 
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         res.status(500).json({ error: 'Erreur lecture' });
     }
-});
-
-app.post('/generate-content', authenticateToken, async (req, res) => {
-    try {
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-                { role: "system", content: "Réponds UNIQUEMENT avec un JSON valide : { \"subject\": \"...\", \"body\": \"...\" }. Le body est du HTML simple." },
-                { role: "user", content: `Sujet: "${req.body.topic}". Utilise {{nom}}.` }
-            ],
-        });
-        res.json(JSON.parse(completion.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim()));
-    } catch (error) { res.status(500).json({ error: "Erreur IA" }); }
-});
-
-
-// --- 6. ENVOI EMAIL (LOGIQUE INTELLIGENTE) ---
-app.post('/send-mail', authenticateToken, upload.single('attachment'), async (req, res) => {
-    let recipients;
-    try { recipients = JSON.parse(req.body.recipients); } catch (e) { return res.status(400).json({ error: "Erreur destinataires" }); }
-
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ error: "Inconnu" });
-    if (user.credits < recipients.length) return res.status(403).json({ error: "Crédits insuffisants" });
-
-    // --- CONFIGURATION SMTP INTELLIGENTE ---
-    let transporter;
-    let fromAddress;
-    let replyToAddress;
-
-    // CAS 1 : SMTP Perso (Paramètres)
-    if (user.smtpUser && user.smtpPass) {
-        transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: { user: user.smtpUser, pass: user.smtpPass }
-        });
-        fromAddress = user.smtpUser;
-        replyToAddress = user.smtpUser;
-    } 
-    // CAS 2 : Système par défaut (Brevo)
-    else {
-        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-            console.error("❌ CRITIQUE : Variables SMTP système manquantes sur Render (SMTP_USER/SMTP_PASS).");
-            return res.status(500).json({ error: "Serveur d'envoi non configuré." });
-        }
-
-        transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
-            port: parseInt(process.env.SMTP_PORT || "587"),
-            secure: false, // true pour 465, false pour les autres ports
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            }
-        });
-
-        // "De la part de..." + Réponse vers l'utilisateur
-        fromAddress = `"Via Newsletter" <${process.env.SMTP_USER}>`; 
-        replyToAddress = user.email; 
-    }
-
-    const trackingPixel = `<img src="${req.protocol}://${req.get('host')}/track/${user._id}" width="1" height="1" style="display:none;" />`;
-    let successCount = 0;
-    let errorCount = 0;
-
-    console.log(`📧 Démarrage envoi pour ${user.email} (SMTP Perso: ${!!user.smtpUser})`);
-
-    for (const contact of recipients) {
-        try {
-            await transporter.sendMail({
-                from: fromAddress,
-                replyTo: replyToAddress, // La réponse va chez l'utilisateur
-                to: contact.email,
-                subject: req.body.subject,
-                html: req.body.message.replace(/{{nom}}/gi, contact.name || '').replace(/Bonjour\s?,/gi, 'Bonjour,') + trackingPixel,
-                attachments: req.file ? [{ filename: req.file.originalname, path: req.file.path }] : []
-            });
-            successCount++;
-            console.log(`✅ OK: ${contact.email}`);
-            await new Promise(r => setTimeout(r, 500)); // Pause anti-spam
-        } catch (error) { 
-            console.error(`❌ ERREUR vers ${contact.email}:`, error.message);
-            errorCount++; 
-        }
-    }
-
-    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-
-    if (successCount > 0) {
-        user.credits -= successCount;
-        await user.save();
-        if(Campaign) try { await new Campaign({ userId: user._id, subject: req.body.subject, recipientCount: successCount }).save(); } catch(e) {}
-    }
-    
-    res.json({ success: true, count: successCount, errors: errorCount, newCredits: user.credits, currentOpens: user.opens });
 });
 
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public/login.html')));
