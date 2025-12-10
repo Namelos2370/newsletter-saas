@@ -22,17 +22,19 @@ const app = express();
 
 // --- 1. CONFIGURATION ---
 
+// Sécurité de base
 if (!process.env.JWT_SECRET) {
-    console.error("🔥 ERREUR : JWT_SECRET manquant dans .env");
-    process.exit(1);
+    console.error("🔥 ERREUR CRITIQUE : JWT_SECRET manquant dans les variables d'environnement !");
+    // On ne coupe pas le processus pour laisser Render afficher les logs, mais ça ne marchera pas bien.
 }
 
 const uploadDir = 'uploads';
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
+// Connexion MongoDB avec logs détaillés
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ Connecté à MongoDB'))
-    .catch(err => console.error('❌ Erreur MongoDB:', err));
+    .catch(err => console.error('❌ Erreur Connexion MongoDB:', err));
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -156,39 +158,16 @@ app.get('/api/admin/feedbacks', authenticateToken, requireAdmin, async (req, res
 
 // --- 5. FEATURES UTILISATEUR ---
 
-// NOUVEAU : ASSISTANT SUPPORT (CHATBOT)
 app.post('/api/assist', authenticateToken, async (req, res) => {
     const { question } = req.body;
     try {
-        const systemContext = `
-            Tu es l'assistant virtuel de "Newsletter Studio Ultimate".
-            Ton but est d'aider l'utilisateur brièvement (max 2-3 phrases).
-            
-            INFOS CLÉS :
-            - Fonction : Envoi de newsletters avec IA et Tracking.
-            - Import : PDF, Excel ou CSV supportés.
-            - IA : GPT-4o-mini pour rédiger les brouillons.
-            - Tracking : Compteur de vues inclus.
-            
-            TARIFS (CRÉDITS) :
-            - Starter : 500 crédits pour 3 000 FCFA.
-            - Pro : 2 000 crédits pour 10 000 FCFA.
-            - Business : 5 000 crédits pour 20 000 FCFA.
-            
-            RÈGLES :
-            - Réponds en français, sois courtois et concis.
-            - Si question technique, explique simplement.
-        `;
-
+        const systemContext = `Tu es l'assistant de Newsletter Studio. Réponds brièvement. Tarifs: Starter(3000F/500), Pro(10000F/2000).`;
         const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
-            messages: [
-                { role: "system", content: systemContext },
-                { role: "user", content: question }
-            ],
+            messages: [{ role: "system", content: systemContext }, { role: "user", content: question }],
         });
         res.json({ reply: completion.choices[0].message.content });
-    } catch (error) { res.status(500).json({ error: "Je dors... Réessayez plus tard." }); }
+    } catch (error) { res.status(500).json({ error: "Je dors..." }); }
 });
 
 app.post('/api/feedback', authenticateToken, async (req, res) => {
@@ -277,6 +256,8 @@ app.post('/generate-content', authenticateToken, async (req, res) => {
     } catch (error) { res.status(500).json({ error: "Erreur IA" }); }
 });
 
+
+// --- 6. ENVOI EMAIL (AVEC DEBUGGING LOGS) ---
 app.post('/send-mail', authenticateToken, upload.single('attachment'), async (req, res) => {
     let recipients;
     try { recipients = JSON.parse(req.body.recipients); } catch (e) { return res.status(400).json({ error: "Erreur destinataires" }); }
@@ -285,12 +266,29 @@ app.post('/send-mail', authenticateToken, upload.single('attachment'), async (re
     if (!user) return res.status(404).json({ error: "Inconnu" });
     if (user.credits < recipients.length) return res.status(403).json({ error: "Crédits insuffisants" });
 
-    let smtpConfig = (user.smtpUser && user.smtpPass) ? { user: user.smtpUser, pass: user.smtpPass } : { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS };
+    // CONFIG SMTP
+    let smtpConfig;
+    if (user.smtpUser && user.smtpPass) {
+        smtpConfig = { user: user.smtpUser, pass: user.smtpPass };
+    } else {
+        // Fallback système : Vérification que les variables existent
+        if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
+            console.error("❌ ERREUR CRITIQUE : GMAIL_USER ou GMAIL_PASS manquant sur le serveur !");
+            return res.status(500).json({ error: "Erreur configuration serveur (SMTP)" });
+        }
+        smtpConfig = { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS };
+    }
     
-    let transporter = nodemailer.createTransport({ service: 'gmail', auth: smtpConfig });
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: smtpConfig
+    });
+
     let successCount = 0;
     let errorCount = 0;
     const trackingPixel = `<img src="${req.protocol}://${req.get('host')}/track/${user._id}" width="1" height="1" style="display:none;" />`;
+
+    console.log(`📧 Démarrage envoi pour ${user.email} vers ${recipients.length} destinataires via ${smtpConfig.user}...`);
 
     for (const contact of recipients) {
         try {
@@ -302,11 +300,20 @@ app.post('/send-mail', authenticateToken, upload.single('attachment'), async (re
                 attachments: req.file ? [{ filename: req.file.originalname, path: req.file.path }] : []
             });
             successCount++;
+            console.log(`✅ Succès vers ${contact.email}`); // Log succès
             await new Promise(r => setTimeout(r, 1000));
-        } catch (error) { errorCount++; }
+        } catch (error) { 
+            // --- LOG ERREUR PRÉCIS ---
+            console.error(`❌ ÉCHEC vers ${contact.email} :`, error.message);
+            if(error.response) console.error("   Détail SMTP:", error.response);
+            errorCount++; 
+        }
     }
 
+    console.log(`🏁 Fin envoi. Succès: ${successCount}, Erreurs: ${errorCount}`);
+
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    
     if (successCount > 0) {
         user.credits -= successCount;
         await user.save();
@@ -315,7 +322,6 @@ app.post('/send-mail', authenticateToken, upload.single('attachment'), async (re
     res.json({ success: true, count: successCount, errors: errorCount, newCredits: user.credits, currentOpens: user.opens });
 });
 
-// Routes Pages
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public/login.html')));
 app.get('/register', (req, res) => res.sendFile(path.join(__dirname, 'public/register.html')));
 app.get('/landing', (req, res) => res.sendFile(path.join(__dirname, 'public/landing.html')));
