@@ -54,41 +54,39 @@
 
         /* MODALS */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px; }
-        .modal-box { background: white; padding: 25px; border-radius: 24px; width: 100%; max-width: 450px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; max-height: 90vh; overflow-y: auto; }
+        .modal-box { background: white; padding: 25px; border-radius: 24px; width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; max-height: 90vh; overflow-y: auto; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .plan-card { border: 1px solid var(--border); border-radius: 12px; padding: 15px 5px; cursor: pointer; text-align: center; font-size: 0.9rem; }
-        .plan-price { font-weight: bold; margin-top: 5px; color: var(--text-main); }
+        .plan-card { border: 1px solid var(--border); border-radius: 12px; padding: 15px; cursor: pointer; text-align: left; font-size: 0.9rem; transition:0.2s; display:flex; flex-direction:column; justify-content:space-between; }
+        .plan-card:hover { border-color: var(--primary); background: #f0fdfa; transform: translateY(-2px); }
+        .plan-price { font-weight: 800; margin-top: 5px; color: var(--text-main); font-size: 1.1rem; }
+        .pack-features { list-style: none; padding: 0; margin: 10px 0; font-size: 0.75rem; color: #64748b; }
+        .pack-features li { display: flex; gap: 5px; margin-bottom: 3px; }
         
+        .btn-whatsapp { background: #25D366; color: white; width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: 700; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; font-size: 0.95rem; }
+        .btn-whatsapp:hover { background: #128C7E; }
+
+        .instruction-step { display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-start; }
+        .step-num { background: var(--primary); color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.8rem; flex-shrink: 0; }
+
         /* CHATBOT & WIDGETS */
         .chat-btn { position: fixed; bottom: 25px; right: 25px; width: 55px; height: 55px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; z-index: 5000; box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
         .chat-window { position: fixed; bottom: 90px; right: 25px; width: 340px; height: 50vh; background: white; border-radius: 20px; display: none; flex-direction: column; z-index: 5000; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid var(--border); overflow: hidden; }
         
-        /* --- MOBILE OPTIMIZATION (LE GROS CHANGEMENT) --- */
+        /* MOBILE OPTIMIZATION */
         @media (max-width: 768px) {
             body { padding: 15px; padding-bottom: 90px; }
-            
-            /* Header sur 2 lignes */
             .header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .header-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
             .action-btn { justify-content: center; padding: 12px; font-size: 0.8rem; }
-            .action-btn span { display: none; } /* On cache le texte, on garde l'icône */
+            .action-btn span { display: none; } 
             .action-btn i { font-size: 1.2rem; }
-            
-            /* Stats empilées ou grille 2 */
             .stats-row { grid-template-columns: 1fr 1fr; }
             .stats-row .stat-card:first-child { grid-column: 1 / -1; display: flex; flex-direction: row; align-items: center; justify-content: space-between; }
             .stats-row .stat-card:first-child .btn-recharge { width: auto; margin: 0; }
-
-            /* Grille principale en 1 colonne */
             .main-grid { grid-template-columns: 1fr; gap: 20px; }
-            
-            /* Modal Paiement */
-            .pricing-grid { grid-template-columns: 1fr; }
-            .plan-card { display: flex; justify-content: space-between; align-items: center; padding: 15px; text-align: left; }
-            
-            /* Chatbot Plein écran (presque) */
+            .pricing-grid { grid-template-columns: 1fr; } 
             .chat-window { width: 90%; left: 5%; right: 5%; bottom: 90px; height: 60vh; }
         }
     </style>
@@ -158,35 +156,84 @@
 
     <div id="paymentModal" class="modal-overlay">
         <div class="modal-box">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="margin:0; font-size:1.3rem;">Recharger</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2 style="margin:0; font-size:1.3rem;">Choisir un Pack</h2>
                 <i class="fa-solid fa-xmark" style="font-size:1.5rem; cursor:pointer;" onclick="document.getElementById('paymentModal').style.display='none'"></i>
             </div>
             
             <div id="step1">
                 <div class="pricing-grid">
                     <div class="plan-card" onclick="selectPack('starter', 3000)">
-                        <b>STARTER</b> <br> <span style="color:var(--primary); font-weight:bold;">500 Credits</span> <br> <span class="plan-price">3 000 FCFA</span>
+                        <div>
+                            <b style="color:#0f172a;">STARTER</b>
+                            <ul class="pack-features">
+                                <li><i class="fa-solid fa-check" style="color:green;"></i> 500 Crédits</li>
+                                <li><i class="fa-solid fa-check" style="color:green;"></i> IA Basic</li>
+                                <li><i class="fa-solid fa-check" style="color:green;"></i> Support Standard</li>
+                            </ul>
+                        </div>
+                        <span class="plan-price">3 000 FCFA</span>
                     </div>
                     <div class="plan-card" style="border-color:var(--primary); background:#eef2ff;" onclick="selectPack('pro', 10000)">
-                        <b>PRO</b> <br> <span style="color:var(--primary); font-weight:bold;">2 000 Credits</span> <br> <span class="plan-price">10 000 FCFA</span>
+                        <div>
+                            <b style="color:var(--primary);">PRO</b>
+                            <ul class="pack-features">
+                                <li><i class="fa-solid fa-check" style="color:green;"></i> 2 000 Crédits</li>
+                                <li><i class="fa-solid fa-check" style="color:green;"></i> IA Avancée</li>
+                                <li><i class="fa-solid fa-check" style="color:green;"></i> Priorité d'envoi</li>
+                            </ul>
+                        </div>
+                        <span class="plan-price">10 000 FCFA</span>
                     </div>
                     <div class="plan-card" onclick="selectPack('business', 20000)">
-                        <b>BUSINESS</b> <br> <span style="color:var(--primary); font-weight:bold;">5 000 Credits</span> <br> <span class="plan-price">20 000 FCFA</span>
+                        <div>
+                            <b style="color:#0f172a;">BUSINESS</b>
+                            <ul class="pack-features">
+                                <li><i class="fa-solid fa-check" style="color:green;"></i> 5 000 Crédits</li>
+                                <li><i class="fa-solid fa-check" style="color:green;"></i> Support VIP</li>
+                                <li><i class="fa-solid fa-check" style="color:green;"></i> Tracking Pro</li>
+                            </ul>
+                        </div>
+                        <span class="plan-price">20 000 FCFA</span>
                     </div>
                 </div>
             </div>
 
             <div id="step2" style="display:none;">
-                <div style="background:#fff7ed; border:1px solid #fdba74; padding:15px; border-radius:12px; margin-bottom:15px;">
-                    <h3 style="margin:0 0 10px 0; color:#c2410c;">Envoyez <span id="amountToPay"></span> FCFA</h3>
-                    <p style="margin:5px 0;">🟠 <b>OM :</b> 690 00 00 00 (Nom)</p>
-                    <p style="margin:5px 0;">🟡 <b>MOMO :</b> 670 00 00 00 (Nom)</p>
+                <h3 style="margin:0 0 15px 0; color:var(--primary); text-align:center;">Finaliser le Paiement</h3>
+                
+                <div class="instruction-step">
+                    <div class="step-num">1</div>
+                    <div style="font-size:0.9rem;">
+                        Envoyez <b><span id="amountToPay"></span> FCFA</b> par Mobile Money :
+                        <div style="margin-top:5px; font-weight:bold;">
+                            🟠 Orange: 658 98 00 51<br>
+                            🟡 MTN: 653 76 33 93
+                        </div>
+                        <div style="font-size:0.8rem; color:#666;">(Nom: VibStore)</div>
+                    </div>
                 </div>
-                <label style="font-weight:600; font-size:0.9rem;">Votre numéro ou ID Transaction :</label>
-                <input type="tel" id="payRef" placeholder="Ex: 699..." style="font-size:1.1rem; padding:15px;">
-                <button onclick="sendPaymentRequest()" class="btn-send">Valider le paiement</button>
-                <div style="text-align:center; margin-top:15px; text-decoration:underline; cursor:pointer;" onclick="resetPay()">Changer de pack</div>
+
+                <div class="instruction-step">
+                    <div class="step-num">2</div>
+                    <div style="width:100%;">
+                        <label style="font-size:0.9rem; font-weight:600;">Saisissez l'ID de Transaction ou votre Numéro :</label>
+                        <input type="tel" id="payRef" placeholder="Ex: 699 99..." style="font-size:1rem; padding:12px;">
+                    </div>
+                </div>
+
+                <div class="instruction-step">
+                    <div class="step-num">3</div>
+                    <div style="font-size:0.9rem;">Cliquez sur valider. Vos crédits seront ajoutés après vérification (max 10 min).</div>
+                </div>
+
+                <button onclick="sendPaymentRequest()" class="btn-send" style="margin-top:10px;">Valider le paiement</button>
+
+                <a href="https://wa.me/237658980051" target="_blank" class="btn-whatsapp">
+                    <i class="fa-brands fa-whatsapp" style="font-size:1.2rem;"></i> Un problème ? Contactez-nous
+                </a>
+
+                <div style="text-align:center; margin-top:15px; text-decoration:underline; cursor:pointer; color:#64748b;" onclick="resetPay()">Retour au choix</div>
             </div>
         </div>
     </div>
