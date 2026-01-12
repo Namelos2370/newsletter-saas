@@ -15,7 +15,7 @@ const path = require('path');
 // --- IMPORT DES MODÈLES ---
 const User = require('./models/User');
 const Feedback = require('./models/Feedback');
-const Transaction = require('./models/Transaction'); // Nouveau
+const Transaction = require('./models/Transaction');
 let Campaign;
 try { Campaign = require('./models/Campaign'); } catch (e) { console.log("⚠️ Note: Historique désactivé."); }
 
@@ -80,7 +80,7 @@ app.post('/generate-content', authenticateToken, async (req, res) => {
     } catch (error) { res.status(500).json({ error: "Erreur IA" }); }
 });
 
-// 2. ENVOI EMAIL (LOGIQUE INTELLIGENTE FIXÉE)
+// 2. ENVOI EMAIL (AVEC DESABONNEMENT)
 app.post('/send-mail', authenticateToken, upload.single('attachment'), async (req, res) => {
     let recipients;
     try { 
@@ -99,7 +99,7 @@ app.post('/send-mail', authenticateToken, upload.single('attachment'), async (re
         fromAddress = user.smtpUser;
         replyToAddress = user.smtpUser;
     } 
-    // CAS 2 : Système par défaut (Mailjet/Brevo)
+    // CAS 2 : Système par défaut
     else {
         if (!process.env.SMTP_USER || !process.env.SENDER_EMAIL) return res.status(500).json({ error: "Erreur config serveur (SENDER_EMAIL manquant)." });
         
@@ -109,24 +109,39 @@ app.post('/send-mail', authenticateToken, upload.single('attachment'), async (re
             secure: false,
             auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
         });
-        
         fromAddress = `"Newsletter" <${process.env.SENDER_EMAIL}>`; 
-        replyToAddress = user.email; // Réponse vers le client
+        replyToAddress = user.email;
     }
 
     const trackingPixel = `<img src="${req.protocol}://${req.get('host')}/track/${user._id}" width="1" height="1" style="display:none;" />`;
-    let successCount = 0, errorCount = 0;
+    
+    // PIED DE PAGE DÉSABONNEMENT (Légal & Anti-Spam)
+    const unsubscribeFooter = `
+        <br><br>
+        <div style="text-align:center; font-size:12px; color:#94a3b8; border-top:1px solid #e2e8f0; padding-top:15px; margin-top:20px;">
+            Cet email a été envoyé via une plateforme de marketing.<br>
+            <a href="${req.protocol}://${req.get('host')}/unsubscribe" style="color:#64748b; text-decoration:underline;">Se désinscrire de cette liste</a>
+        </div>
+    `;
 
+    let successCount = 0, errorCount = 0;
     console.log(`📧 Envoi ${recipients.length} mails. From: ${fromAddress}`);
 
     for (const contact of recipients) {
         try {
+            let finalHtml = req.body.message
+                .replace(/{{nom}}/gi, contact.name || '')
+                .replace(/Bonjour\s?,/gi, 'Bonjour,');
+            
+            // Ajout Pixel + Footer
+            finalHtml += unsubscribeFooter + trackingPixel;
+
             await transporter.sendMail({
                 from: fromAddress,
                 replyTo: replyToAddress,
                 to: contact.email,
                 subject: req.body.subject,
-                html: req.body.message.replace(/{{nom}}/gi, contact.name || '').replace(/Bonjour\s?,/gi, 'Bonjour,') + trackingPixel,
+                html: finalHtml,
                 attachments: req.file ? [{ filename: req.file.originalname, path: req.file.path }] : []
             });
             successCount++;
@@ -147,7 +162,7 @@ app.post('/send-mail', authenticateToken, upload.single('attachment'), async (re
     res.json({ success: true, count: successCount, errors: errorCount, newCredits: user.credits });
 });
 
-// 3. PAIEMENT MANUEL (CLIENT)
+// 3. PAIEMENT MANUEL
 app.post('/api/payment/declare', authenticateToken, async (req, res) => {
     const { pack, ref } = req.body;
     let amount = 0;
@@ -162,12 +177,37 @@ app.post('/api/payment/declare', authenticateToken, async (req, res) => {
     } catch (e) { res.status(500).json({ error: "Erreur" }); }
 });
 
-// 4. ADMIN : GESTION TRANSACTIONS
-app.get('/api/admin/transactions', authenticateToken, requireAdmin, async (req, res) => {
+// 4. AUTHENTIFICATION (50 CRÉDITS OFFERTS)
+app.post('/auth/register', async (req, res) => {
     try {
-        const list = await Transaction.find().populate('userId', 'email').sort({ date: -1 });
-        res.json(list);
+        const { email, password } = req.body;
+        if(await User.findOne({ email })) return res.status(400).json({ error: "Email pris" });
+        
+        // CADEAU DE BIENVENUE : 50 Credits
+        const user = new User({ 
+            email, 
+            password: await bcrypt.hash(password, 10),
+            credits: 50 
+        });
+        
+        await user.save();
+        res.json({ success: true });
     } catch (e) { res.status(500).json({ error: "Erreur" }); }
+});
+
+app.post('/auth/login', async (req, res) => {
+    try {
+        const user = await User.findOne({ email: req.body.email });
+        if (!user || !(await bcrypt.compare(req.body.password, user.password))) return res.status(400).json({ error: "Erreur login" });
+        const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '24h' });
+        const admins = (process.env.ADMIN_EMAIL || "").split(',').map(e => e.trim());
+        res.json({ success: true, token, credits: user.credits, opens: user.opens || 0, isAdmin: admins.includes(user.email) });
+    } catch (e) { res.status(500).json({ error: "Erreur" }); }
+});
+
+// 5. ADMIN
+app.get('/api/admin/transactions', authenticateToken, requireAdmin, async (req, res) => {
+    try { res.json(await Transaction.find().populate('userId', 'email').sort({ date: -1 })); } catch (e) { res.status(500).json({ error: "Erreur" }); }
 });
 
 app.post('/api/admin/validate-transaction', authenticateToken, requireAdmin, async (req, res) => {
@@ -193,27 +233,22 @@ app.post('/api/admin/validate-transaction', authenticateToken, requireAdmin, asy
     } catch (e) { res.status(500).json({ error: "Erreur" }); }
 });
 
-// --- AUTRES ROUTES ---
-app.post('/auth/register', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        if(await User.findOne({ email })) return res.status(400).json({ error: "Email pris" });
-        const user = new User({ email, password: await bcrypt.hash(password, 10) });
-        await user.save();
-        res.json({ success: true });
-    } catch (e) { res.status(500).json({ error: "Erreur" }); }
+app.get('/api/admin/users', authenticateToken, requireAdmin, async (req, res) => res.json(await User.find().sort({createdAt:-1})));
+app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) => {
+    const users = await User.find();
+    res.json({ totalUsers: users.length, totalCredits: users.reduce((a,c)=>a+(c.credits||0),0) });
 });
-
-app.post('/auth/login', async (req, res) => {
-    try {
-        const user = await User.findOne({ email: req.body.email });
-        if (!user || !(await bcrypt.compare(req.body.password, user.password))) return res.status(400).json({ error: "Erreur login" });
-        const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '24h' });
-        const admins = (process.env.ADMIN_EMAIL || "").split(',').map(e => e.trim());
-        res.json({ success: true, token, credits: user.credits, opens: user.opens || 0, isAdmin: admins.includes(user.email) });
-    } catch (e) { res.status(500).json({ error: "Erreur" }); }
+// Delete User
+app.delete('/api/admin/user/:id', authenticateToken, requireAdmin, async (req, res) => {
+    try { await User.findByIdAndDelete(req.params.id); res.json({success:true}); } catch(e){ res.status(500).json({error:"Err"}); }
 });
+// Add Bonus Credits
+app.post('/api/admin/credits', authenticateToken, requireAdmin, async (req, res) => {
+    try { await User.findByIdAndUpdate(req.body.userId, { $inc: { credits: req.body.amount } }); res.json({success:true}); } catch(e){ res.status(500).json({error:"Err"}); }
+});
+app.get('/api/admin/feedbacks', authenticateToken, requireAdmin, async (req, res) => res.json(await Feedback.find().populate('userId','email').sort({date:-1})));
 
+// --- OUTILS & HELPERS ---
 app.post('/extract-file', authenticateToken, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'Fichier manquant' });
     let contacts = [];
@@ -244,17 +279,33 @@ app.get('/api/history', authenticateToken, async (req, res) => {
     res.json({ success: true, campaigns });
 });
 
-app.get('/api/admin/users', authenticateToken, requireAdmin, async (req, res) => res.json(await User.find().sort({createdAt:-1})));
-app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) => {
-    const users = await User.find();
-    res.json({ totalUsers: users.length, totalCredits: users.reduce((a,c)=>a+(c.credits||0),0) });
-});
-
 app.get('/track/:userId', async (req, res) => {
     try { await User.findByIdAndUpdate(req.params.userId, { $inc: { opens: 1 } }); } catch (e) {}
     const img = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
     res.writeHead(200, { 'Content-Type': 'image/gif', 'Content-Length': img.length });
     res.end(img);
+});
+
+// Route Désabonnement
+app.get('/unsubscribe', (req, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Désabonnement</title>
+            <style>body{font-family:'Segoe UI',sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#f8fafc;color:#334155;} .box{background:white;padding:40px;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.05);text-align:center;max-width:400px;}</style>
+        </head>
+        <body>
+            <div class="box">
+                <h2 style="color:#10b981;">✅ C'est fait.</h2>
+                <p>Vous avez été désinscrit avec succès de cette liste de diffusion.</p>
+                <p style="font-size:0.9rem; color:#94a3b8; margin-top:20px;">Vous ne recevrez plus d'emails de cet expéditeur.</p>
+            </div>
+        </body>
+        </html>
+    `);
 });
 
 // Chatbot & Feedback
@@ -271,6 +322,7 @@ app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public/login.
 app.get('/register', (req, res) => res.sendFile(path.join(__dirname, 'public/register.html')));
 app.get('/landing', (req, res) => res.sendFile(path.join(__dirname, 'public/landing.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public/admin.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public/index.html')));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Serveur prêt sur port ${PORT}`));
