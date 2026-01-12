@@ -65,9 +65,11 @@
         .ql-toolbar { border-top-left-radius: 12px; border-top-right-radius: 12px; background: #f8fafc; border: 2px solid var(--border)!important; }
         .ql-container { border: none!important; font-family: 'Plus Jakarta Sans', sans-serif; }
         
-        /* AI BUTTON */
-        .ai-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        #btnAi { background: linear-gradient(135deg,#8b5cf6,#6366f1); color: white; border: none; border-radius: 12px; padding: 0 25px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+        /* AI BUTTON & MICRO */
+        .ai-group { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
+        #btnAi { background: linear-gradient(135deg,#8b5cf6,#6366f1); color: white; border: none; border-radius: 12px; padding: 0 20px; font-weight: 700; white-space: nowrap; cursor: pointer; height: 50px; }
+        .mic-active { color: red !important; animation: beat 1s infinite; }
+        @keyframes beat { 0% { transform: translateY(-50%) scale(1); } 50% { transform: translateY(-50%) scale(1.2); } 100% { transform: translateY(-50%) scale(1); } }
 
         /* MODALS (Standard) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px; }
@@ -134,15 +136,18 @@
                 <h3><i class="fa-solid fa-pen-nib" style="color:var(--primary)"></i> Contenu du Mail</h3>
                 
                 <div class="ai-group">
-                    <input type="text" id="aiTopic" placeholder="Sujet IA (ex: Promo Ramadan)" style="margin:0;">
-                    <button onclick="generateAI()" id="btnAi"><i class="fa-solid fa-wand-magic-sparkles"></i> Générer</button>
+                    <div style="position:relative; width:100%;">
+                        <input type="text" id="aiTopic" placeholder="Décrivez votre offre (ex: Promo Ramadan -30%)" style="margin:0; padding-right:40px; height: 50px;">
+                        <i class="fa-solid fa-microphone" id="micBtn" onclick="startDictation()" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); color:var(--primary); cursor:pointer; font-size:1.2rem; transition:0.2s;" title="Dicter"></i>
+                    </div>
+                    <button onclick="generateAI()" id="btnAi"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
                 </div>
 
                 <div class="wa-tool">
                     <div style="font-size:0.85rem; color:#166534; font-weight:700;"><i class="fa-brands fa-whatsapp"></i> Booster les ventes</div>
                     <div class="wa-row">
-                        <input type="tel" id="waNumber" placeholder="Votre Numéro (237...)" style="margin:0; border:1px solid #86efac;">
-                        <button class="btn-add-wa" onclick="insertWaBtn()">Ajouter le Bouton</button>
+                        <input type="tel" id="waNumber" placeholder="Numéro (237...)" style="margin:0; border:1px solid #86efac;">
+                        <button class="btn-add-wa" onclick="insertWaBtn()">Ajouter Bouton</button>
                     </div>
                 </div>
 
@@ -183,7 +188,7 @@
             <div id="step2" style="display:none;">
                 <div style="background:#fff7ed; border:2px solid #fdba74; padding:20px; border-radius:16px; margin-bottom:20px;">
                     <h3 style="margin:0; color:#c2410c;">Envoyez <span id="amountToPay"></span> FCFA</h3>
-                    <p style="margin:5px 0;">🟠 OM : 658 98 00 51<br>🟡 MOMO : 653 76 33 93 </p>
+                    <p style="margin:5px 0;">🟠 OM : 658980051 <br>🟡 MOMO : 653 76 33 03</p>
                     <p style="margin:0; font-size:0.8rem;">(Gabriel Ezekiel Junior Fokou)</p>
                 </div>
                 <input type="text" id="payRef" placeholder="ID Transaction ou Numéro..." style="padding:15px; border:2px solid #cbd5e1;">
@@ -227,19 +232,41 @@
         function removeAttachment() { fileInput.value = ''; document.getElementById('fileChip').style.display = 'none'; }
         async function importFile(file) { if(!file) return; const fd = new FormData(); fd.append('file', file); try { const res = await fetch('/extract-file', { method:'POST', headers:{'Authorization':'Bearer '+token}, body:fd }); const data = await res.json(); emailList.value += (emailList.value?'\n':'') + data.contacts.join('\n'); updateCount(); localStorage.setItem('d_list', emailList.value); } catch(e){} }
 
-        // --- FONCTION WA BUTTON ---
+        // --- NEW FEATURES ---
+        // 1. DICTAPHONE
+        function startDictation() {
+            if (window.hasOwnProperty('webkitSpeechRecognition')) {
+                const mic = document.getElementById('micBtn');
+                const recognition = new webkitSpeechRecognition();
+                recognition.continuous = false; recognition.interimResults = false; recognition.lang = "fr-FR";
+                recognition.onstart = function() { mic.classList.add('mic-active'); document.getElementById('aiTopic').placeholder = "Parlez..."; };
+                recognition.onend = function() { mic.classList.remove('mic-active'); document.getElementById('aiTopic').placeholder = "Décrivez votre offre..."; };
+                recognition.onresult = function(e) { document.getElementById('aiTopic').value = e.results[0][0].transcript; };
+                recognition.start();
+            } else { alert("Option vocale non supportée sur ce navigateur (utilisez Chrome)"); }
+        }
+
+        // 2. AUTO-SAVE
+        setInterval(() => {
+            const draft = { sub: document.getElementById('subject').value, body: quill.root.innerHTML };
+            if(draft.sub || draft.body.length > 20) localStorage.setItem('mailDraft', JSON.stringify(draft));
+        }, 3000);
+        
+        window.addEventListener('load', () => {
+            const s = localStorage.getItem('mailDraft');
+            if(s) { const d = JSON.parse(s); if(!document.getElementById('subject').value) document.getElementById('subject').value = d.sub; if(quill.root.innerHTML === '<p><br></p>') quill.root.innerHTML = d.body; }
+        });
+
+        // 3. WHATSAPP BTN
         function insertWaBtn() {
             const num = document.getElementById('waNumber').value.replace(/\s+/g, '');
             if(!num) return alert("Entrez un numéro !");
             const link = `https://wa.me/${num}?text=Bonjour,%20je%20suis%20intéressé%20par%20votre%20offre`;
             const btnHtml = `<br><div style="text-align:center; margin: 20px 0;"><a href="${link}" style="background-color:#25D366; color:white; padding:12px 25px; text-decoration:none; border-radius:50px; font-weight:bold; font-size:16px; font-family:sans-serif; border:1px solid #25D366;">Commander sur WhatsApp 💬</a></div><br>`;
-            // Insertion sûre dans Quill
-            const range = quill.getSelection(true);
-            quill.clipboard.dangerouslyPasteHTML(range ? range.index : quill.getLength(), btnHtml);
-            alert("Bouton ajouté !");
+            const range = quill.getSelection(true); quill.clipboard.dangerouslyPasteHTML(range ? range.index : quill.getLength(), btnHtml);
         }
 
-        async function generateAI() { const t=document.getElementById('aiTopic').value; if(!t) return alert("Sujet?"); const b=document.getElementById('btnAi'); b.innerHTML="..."; try{ const res=await fetch('/generate-content',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({topic:t})}); const d=await res.json(); document.getElementById('subject').value=d.subject; quill.root.innerHTML=d.body; }catch(e){} b.innerHTML="Générer"; }
+        async function generateAI() { const t=document.getElementById('aiTopic').value; if(!t) return alert("Sujet?"); const b=document.getElementById('btnAi'); b.innerHTML="..."; try{ const res=await fetch('/generate-content',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({topic:t})}); const d=await res.json(); document.getElementById('subject').value=d.subject; quill.root.innerHTML=d.body; }catch(e){} b.innerHTML=`<i class="fa-solid fa-wand-magic-sparkles"></i>`; }
         
         async function sendMail() {
             const list = emailList.value.split('\n').filter(l=>l.includes('@')).map(l=>{const p=l.split(','); return {email:p[0].trim(), name:p[1]||''}});
@@ -247,7 +274,7 @@
             const btn = document.querySelector('.btn-send'); btn.innerHTML = "Envoi..."; btn.disabled = true;
             const fd = new FormData(); fd.append('recipients', JSON.stringify(list)); fd.append('subject', document.getElementById('subject').value); fd.append('message', quill.root.innerHTML);
             if(fileInput.files[0]) fd.append('attachment', fileInput.files[0]);
-            try { const res = await fetch('/send-mail', { method:'POST', headers:{'Authorization':'Bearer '+token}, body:fd }); const d = await res.json(); if(d.success) { alert(`Envoyés: ${d.count}`); localStorage.setItem('credits', d.newCredits); document.getElementById('creditsDisplay').innerText = d.newCredits; loadHistory(); } else { alert(d.error); } } catch(e){}
+            try { const res = await fetch('/send-mail', { method:'POST', headers:{'Authorization':'Bearer '+token}, body:fd }); const d = await res.json(); if(d.success) { alert(`Envoyés: ${d.count}`); localStorage.setItem('credits', d.newCredits); document.getElementById('creditsDisplay').innerText = d.newCredits; loadHistory(); localStorage.removeItem('mailDraft'); } else { alert(d.error); } } catch(e){}
             btn.innerHTML = "Lancer la Campagne"; btn.disabled = false;
         }
 
