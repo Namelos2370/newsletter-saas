@@ -2,31 +2,74 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin - Newsletter SaaS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; padding: 15px; margin: 0; color:#1e293b; }
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        h1 { margin-top: 0; font-size: 1.5rem; }
+        :root { --primary: #0f172a; --accent: #6366f1; --bg: #f1f5f9; --text: #1e293b; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --card-bg: #ffffff; --radius: 16px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 80px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .brand { font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .refresh-btn { background: white; border: 1px solid #cbd5e1; padding: 10px; border-radius: 50%; cursor: pointer; color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition:0.2s; }
+        .refresh-btn:hover { transform: rotate(180deg); color: var(--accent); border-color: var(--accent); }
+
+        /* KPI CARDS */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
+        .kpi-card { background: var(--card-bg); padding: 20px; border-radius: var(--radius); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-left: 5px solid var(--accent); }
+        .kpi-title { font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.8rem; font-weight: 800; margin-top: 5px; color: var(--primary); }
+        .kpi-icon { float: right; opacity: 0.1; font-size: 1.5rem; }
+
+        /* TABS NAVIGATION */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .tab-btn { background: transparent; border: none; padding: 10px 20px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; font-size: 1rem; transition:0.2s; }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
         
-        .stats { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
-        .stat-box { background: #f8fafc; padding: 15px; border-radius: 8px; flex: 1; min-width: 140px; text-align: center; border: 1px solid #e2e8f0; }
-        .stat-box h2 { margin: 5px 0 0 0; font-size: 1.8rem; color: #6366f1; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* TRANSACTIONS & TABLES */
+        .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .card-list { display: flex; flex-direction: column; gap: 15px; }
         
-        /* TABLEAU RESPONSIVE */
-        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 30px; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; } /* Min-width force le scroll sur mobile */
-        th { text-align: left; background: #f1f5f9; padding: 12px; font-size: 0.85rem; color: #64748b; font-weight: 700; border-bottom: 1px solid #e2e8f0; }
-        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        /* CARD DESIGN FOR ITEMS (Mobile First) */
+        .item-card { background: white; padding: 20px; border-radius: var(--radius); box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; transition:0.2s; }
+        .item-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .item-info h4 { margin: 0 0 5px 0; font-size: 1rem; color: var(--primary); }
+        .item-info p { margin: 0; font-size: 0.85rem; color: #64748b; }
+        .item-meta { text-align: right; }
+        .price-tag { font-weight: 800; color: var(--accent); font-size: 1.1rem; }
         
-        .btn-val { background: #16a34a; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
-        .btn-rej { background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem; margin-left: 5px; }
-        
-        .badge { padding: 4px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        /* ACTIONS */
+        .actions { display: flex; gap: 10px; margin-top: 5px; }
+        .btn-act { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        .btn-approve { background: #dcfce7; color: #166534; }
+        .btn-approve:hover { background: #16a34a; color: white; }
+        .btn-reject { background: #fee2e2; color: #991b1b; }
+        .btn-reject:hover { background: #dc2626; color: white; }
+        .btn-delete { background: #f1f5f9; color: #64748b; }
+        .btn-delete:hover { background: #ef4444; color: white; }
+
+        /* BADGES */
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
         .badge-pending { background: #fef3c7; color: #d97706; }
         .badge-approved { background: #dcfce7; color: #166534; }
-        .badge-rejected { background: #fee2e2; color: #b91c1c; }
+        .badge-rejected { background: #fee2e2; color: #991b1b; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .item-card { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .item-meta { text-align: left; width: 100%; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 10px; }
+            .header { margin-bottom: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -36,72 +79,209 @@
     </script>
 
     <div class="container">
-        <h1>🛠️ Administration</h1>
-        
-        <div class="stats">
-            <div class="stat-box"><h3>Utilisateurs</h3><h2 id="totalUsers">...</h2></div>
-            <div class="stat-box"><h3>Crédits</h3><h2 id="totalCredits">...</h2></div>
+        <div class="header">
+            <div class="brand"><i class="fa-solid fa-shield-halved"></i> Admin Panel</div>
+            <div style="display:flex; gap:10px;">
+                <button class="refresh-btn" onclick="loadData()"><i class="fa-solid fa-rotate-right"></i></button>
+                <button class="refresh-btn" onclick="location.href='/'" style="color:#ef4444; border-color:#fca5a5;"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
         </div>
 
-        <h3>💰 Transactions (Validation)</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Date</th><th>Email</th><th>Pack</th><th>Montant</th><th>Référence</th><th>Action</th></tr></thead>
-                <tbody id="transTable"></tbody>
-            </table>
+        <div class="stats-grid">
+            <div class="kpi-card" style="border-color: #10b981;">
+                <i class="fa-solid fa-sack-dollar kpi-icon"></i>
+                <div class="kpi-title">Chiffre d'Affaires</div>
+                <div class="kpi-value" id="kpiRevenue">0 F</div>
+            </div>
+            <div class="kpi-card" style="border-color: #6366f1;">
+                <i class="fa-solid fa-users kpi-icon"></i>
+                <div class="kpi-title">Utilisateurs</div>
+                <div class="kpi-value" id="kpiUsers">0</div>
+            </div>
+            <div class="kpi-card" style="border-color: #f59e0b;">
+                <i class="fa-solid fa-hourglass-half kpi-icon"></i>
+                <div class="kpi-title">En Attente</div>
+                <div class="kpi-value" id="kpiPending">0</div>
+            </div>
         </div>
 
-        <h3>👤 Liste Utilisateurs</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Email</th><th>Date Inscription</th><th>Crédits</th><th>Vues</th></tr></thead>
-                <tbody id="usersTable"></tbody>
-            </table>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('transactions')">💰 Transactions</button>
+            <button class="tab-btn" onclick="switchTab('users')">👥 Utilisateurs</button>
+            <button class="tab-btn" onclick="switchTab('feedbacks')">💬 Feedbacks</button>
+        </div>
+
+        <div id="tab-transactions" class="tab-content active">
+            <div class="section-title">Demandes de Rechargement</div>
+            <div id="transactionsList" class="card-list">
+                <div style="text-align:center; padding:20px; color:#94a3b8;">Chargement...</div>
+            </div>
+        </div>
+
+        <div id="tab-users" class="tab-content">
+            <div class="section-title">Gestion des Clients</div>
+            <div id="usersList" class="card-list"></div>
+        </div>
+
+        <div id="tab-feedbacks" class="tab-content">
+            <div class="section-title">Messages & Avis</div>
+            <div id="feedbacksList" class="card-list"></div>
         </div>
     </div>
 
     <script>
+        // --- NAVIGATION ONGLETS ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // --- CHARGEMENT DES DONNÉES ---
         async function loadData() {
-            // LOAD STATS & USERS
-            const resStats = await fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } });
-            const stats = await resStats.json();
-            document.getElementById('totalUsers').innerText = stats.totalUsers;
-            document.getElementById('totalCredits').innerText = stats.totalCredits;
+            const headers = { 'Authorization': 'Bearer ' + token };
+            
+            // 1. STATS & USERS
+            try {
+                const resStats = await fetch('/api/admin/stats', { headers });
+                const stats = await resStats.json();
+                
+                const resUsers = await fetch('/api/admin/users', { headers });
+                const users = await resUsers.json();
+                
+                document.getElementById('kpiUsers').innerText = stats.totalUsers;
+                renderUsers(users);
+            } catch(e) { console.error(e); }
 
-            const resUsers = await fetch('/api/admin/users', { headers: { 'Authorization': 'Bearer ' + token } });
-            const users = await resUsers.json();
-            document.getElementById('usersTable').innerHTML = users.map(u => `<tr><td>${u.email}</td><td>${new Date(u.createdAt).toLocaleDateString()}</td><td>${u.credits}</td><td>${u.opens||0}</td></tr>`).join('');
+            // 2. TRANSACTIONS
+            try {
+                const resTrans = await fetch('/api/admin/transactions', { headers });
+                const transactions = await resTrans.json();
+                
+                // Calcul du Chiffre d'Affaires (Somme des transactions approuvées)
+                const revenue = transactions.filter(t => t.status === 'approved').reduce((acc, curr) => acc + curr.amount, 0);
+                document.getElementById('kpiRevenue').innerText = revenue.toLocaleString() + ' F';
+                
+                // Compteur "En attente"
+                const pendingCount = transactions.filter(t => t.status === 'pending').length;
+                document.getElementById('kpiPending').innerText = pendingCount;
+                
+                renderTransactions(transactions);
+            } catch(e) { console.error(e); }
 
-            // LOAD TRANSACTIONS
-            const resTrans = await fetch('/api/admin/transactions', { headers: { 'Authorization': 'Bearer ' + token } });
-            const trans = await resTrans.json();
-            document.getElementById('transTable').innerHTML = trans.map(t => {
-                let actionHtml = '';
+            // 3. FEEDBACKS
+            try {
+                const resFeed = await fetch('/api/admin/feedbacks', { headers });
+                const feedbacks = await resFeed.json();
+                renderFeedbacks(feedbacks);
+            } catch(e) {}
+        }
+
+        // --- RENDERING TRANSACTIONS ---
+        function renderTransactions(list) {
+            const container = document.getElementById('transactionsList');
+            if(list.length === 0) { container.innerHTML = '<div style="text-align:center; padding:20px;">Aucune transaction.</div>'; return; }
+            
+            container.innerHTML = list.map(t => {
+                const date = new Date(t.date).toLocaleDateString() + ' ' + new Date(t.date).toLocaleTimeString().slice(0,5);
+                let statusBadge = '';
+                let actions = '';
+
                 if(t.status === 'pending') {
-                    actionHtml = `<button class="btn-val" onclick="valid('${t._id}', 'approve')">Valider</button><button class="btn-rej" onclick="valid('${t._id}', 'reject')">Rejeter</button>`;
+                    statusBadge = '<span class="badge badge-pending">En Attente</span>';
+                    actions = `
+                        <div class="actions">
+                            <button class="btn-act btn-approve" onclick="processTransac('${t._id}', 'approve')"><i class="fa-solid fa-check"></i> Valider</button>
+                            <button class="btn-act btn-reject" onclick="processTransac('${t._id}', 'reject')"><i class="fa-solid fa-xmark"></i> Rejeter</button>
+                        </div>
+                    `;
+                } else if(t.status === 'approved') {
+                    statusBadge = '<span class="badge badge-approved">Validé</span>';
                 } else {
-                    actionHtml = t.status === 'approved' ? '<span class="badge badge-approved">Payé</span>' : '<span class="badge badge-rejected">Refusé</span>';
+                    statusBadge = '<span class="badge badge-rejected">Rejeté</span>';
                 }
-                return `<tr>
-                    <td>${new Date(t.date).toLocaleDateString()} <small>${new Date(t.date).toLocaleTimeString()}</small></td>
-                    <td>${t.userId?.email || 'Inconnu'}</td>
-                    <td style="font-weight:bold;">${t.pack.toUpperCase()}</td>
-                    <td>${t.amount} FCFA</td>
-                    <td style="font-family:monospace; color:#6366f1;">${t.ref}</td>
-                    <td>${actionHtml}</td>
-                </tr>`;
+
+                return `
+                <div class="item-card" style="${t.status === 'pending' ? 'border-left: 5px solid #f59e0b;' : ''}">
+                    <div class="item-info">
+                        <h4>${t.pack.toUpperCase()} <span style="font-weight:400; color:#64748b;">par</span> ${t.userId ? t.userId.email : 'Inconnu'}</h4>
+                        <p><i class="fa-regular fa-clock"></i> ${date} • Ref: <b style="color:#6366f1;">${t.ref}</b></p>
+                        ${actions}
+                    </div>
+                    <div class="item-meta">
+                        <div class="price-tag">${t.amount.toLocaleString()} F</div>
+                        <div style="margin-top:5px;">${statusBadge}</div>
+                    </div>
+                </div>`;
             }).join('');
         }
 
-        async function valid(id, action) {
-            if(!confirm(action==='approve' ? "Confirmer réception argent ?" : "Refuser ?")) return;
-            await fetch('/api/admin/validate-transaction', {
-                method: 'POST',
+        // --- RENDERING USERS ---
+        function renderUsers(list) {
+            const container = document.getElementById('usersList');
+            container.innerHTML = list.map(u => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>${u.email}</h4>
+                        <p>Inscrit le ${new Date(u.createdAt).toLocaleDateString()}</p>
+                        <div class="actions">
+                           <button class="btn-act btn-delete" onclick="deleteUser('${u._id}')"><i class="fa-solid fa-trash"></i> Supprimer</button>
+                           <button class="btn-act btn-approve" onclick="addBonus('${u._id}')"><i class="fa-solid fa-gift"></i> +100 Credits</button>
+                        </div>
+                    </div>
+                    <div class="item-meta">
+                        <div style="font-size:1.2rem; font-weight:800; color:#0f172a;">${u.credits} <small style="font-size:0.8rem; color:#64748b;">crédits</small></div>
+                        <div style="color:#10b981; font-size:0.9rem;">${u.opens || 0} vues</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- RENDERING FEEDBACKS ---
+        function renderFeedbacks(list) {
+            const container = document.getElementById('feedbacksList');
+            if(list.length === 0) { container.innerHTML = '<div style="text-align:center; padding:20px;">Aucun message.</div>'; return; }
+            container.innerHTML = list.map(f => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>${f.type === 'bug' ? '🐛 Bug' : '💡 Suggestion'} <span style="font-weight:400; color:#64748b;">par ${f.userId ? f.userId.email : 'Anonyme'}</span></h4>
+                        <p style="font-size:1rem; color:#334155; margin-top:5px;">"${f.message}"</p>
+                        <p style="font-size:0.8rem; margin-top:10px; color:#94a3b8;">${new Date(f.date).toLocaleDateString()}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- ACTIONS API ---
+        async function processTransac(id, action) {
+            if(!confirm(action === 'approve' ? "Confirmer la réception de l'argent ?" : "Refuser cette demande ?")) return;
+            try {
+                const res = await fetch('/api/admin/validate-transaction', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ transactionId: id, action: action })
+                });
+                loadData(); // Recharger sans rafraîchir la page
+            } catch(e) { alert("Erreur réseau"); }
+        }
+
+        async function deleteUser(id) {
+            if(!confirm("⚠️ ATTENTION : Supprimer cet utilisateur et tout son historique ?")) return;
+            await fetch('/api/admin/user/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+            loadData();
+        }
+
+        async function addBonus(id) {
+            if(!confirm("Offrir 100 crédits gratuits ?")) return;
+            await fetch('/api/admin/credits', { 
+                method: 'POST', 
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({ transactionId: id, action })
+                body: JSON.stringify({ userId: id, amount: 100 })
             });
             loadData();
         }
+
+        // Lancer au démarrage
         loadData();
     </script>
 </body>

@@ -3,91 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Newsletter SaaS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Newsletter SaaS - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     
     <style>
-        :root { --primary: #6366f1; --primary-dark: #4f46e5; --bg: #f8fafc; --text-main: #0f172a; --border: #e2e8f0; --radius: 16px; }
+        :root { --primary: #6366f1; --primary-dark: #4f46e5; --bg: #f1f5f9; --text-main: #0f172a; --border: #e2e8f0; --radius: 16px; --success: #10b981; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 20px; min-height: 100vh; padding-bottom: 100px; }
         .wrapper { max-width: 1200px; margin: 0 auto; }
         
-        /* HEADER RESPONSIVE */
+        /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px; }
-        .brand h1 { font-size: 1.4rem; font-weight: 800; margin: 0; color: var(--primary); letter-spacing: -0.5px; }
+        .brand h1 { font-size: 1.4rem; font-weight: 800; margin: 0; color: var(--primary); letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
         .header-actions { display: flex; gap: 10px; }
-        .action-btn { background: white; border: 1px solid var(--border); padding: 10px 16px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.85rem; color: #475569; transition: 0.2s; text-decoration: none; white-space: nowrap; }
-        .action-btn i { font-size: 1rem; }
+        .action-btn { background: white; border: 1px solid var(--border); padding: 10px 16px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.85rem; color: #475569; transition: all 0.2s ease; text-decoration: none; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .action-btn:hover { transform: translateY(-2px); border-color: var(--primary); color: var(--primary); box-shadow: 0 5px 12px rgba(99,102,241,0.2); }
         
-        /* STATS */
+        /* STATS ANIMÉES */
         .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: white; padding: 15px 20px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: center; }
-        .stat-card h3 { margin: 0; font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
-        .stat-card p { margin: 5px 0 0 0; font-size: 1.6rem; font-weight: 800; color: var(--text-main); }
-        .btn-recharge { background: var(--text-main); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; margin-top: 10px; font-weight: 600; width: 100%; }
+        .stat-card { background: white; padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); position: relative; overflow: hidden; transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--primary); }
+        .stat-card h3 { margin: 0; font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .stat-card p { margin: 10px 0 0 0; font-size: 1.8rem; font-weight: 800; color: var(--text-main); }
+        .stat-icon { position: absolute; top: 20px; right: 20px; font-size: 1.5rem; opacity: 0.1; color: var(--text-main); }
+        .btn-recharge { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 50px; font-size: 0.8rem; cursor: pointer; margin-top: 15px; font-weight: 700; width: 100%; transition: 0.2s; box-shadow: 0 4px 10px rgba(99,102,241,0.3); }
+        .btn-recharge:hover { background: var(--primary-dark); transform: scale(1.02); }
 
         /* MAIN GRID */
-        .main-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 25px; }
-        .card { background: white; border-radius: var(--radius); padding: 25px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
-        .card h3 { margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+        .main-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 25px; margin-bottom: 25px; }
+        .card { background: white; border-radius: var(--radius); padding: 25px; border: 1px solid var(--border); transition: all 0.3s ease; }
+        .card:hover { box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1); }
+        .card h3 { margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; color: var(--text-main); font-weight: 700; }
         
-        /* FORM ELEMENTS */
-        input, textarea, select { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: #f8fafc; font-size: 0.95rem; font-family: inherit; margin-top: 8px; outline: none; transition: 0.2s; }
-        input:focus, textarea:focus { border-color: var(--primary); background: white; }
+        /* INTERACTIVE FORMS */
+        input, textarea, select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; background: #f8fafc; font-size: 0.95rem; font-family: inherit; margin-top: 8px; outline: none; transition: 0.2s; }
+        input:focus, textarea:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(99,102,241,0.1); }
         
-        .upload-box { border: 2px dashed #cbd5e1; padding: 25px; text-align: center; border-radius: 12px; cursor: pointer; margin-bottom: 15px; background: #f8fafc; color: #64748b; font-weight: 500; transition: 0.2s; }
-        .upload-box:active { background: #e2e8f0; }
+        /* DRAG & DROP UPLOAD */
+        .upload-box { border: 2px dashed #cbd5e1; padding: 30px; text-align: center; border-radius: 16px; cursor: pointer; margin-bottom: 15px; background: #f8fafc; color: #64748b; font-weight: 600; transition: all 0.2s; position: relative; }
+        .upload-box:hover, .upload-box.dragover { border-color: var(--primary); background: #eef2ff; color: var(--primary); transform: scale(0.99); }
+        .upload-box i { font-size: 2rem; margin-bottom: 10px; display: block; transition: 0.2s; }
+        .upload-box:hover i { transform: translateY(-5px); }
 
-        .btn-send { background: var(--text-main); color: white; width: 100%; padding: 18px; border-radius: 14px; border: none; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 25px; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1); }
+        /* ATTACHMENT */
+        .attachment-area { display:flex; align-items:center; gap:10px; margin-top:15px; background:#f1f5f9; padding:10px 15px; border-radius:12px; border: 1px solid var(--border); }
+        .file-chip { display:none; align-items:center; gap:10px; background:white; padding:5px 10px; border-radius:50px; font-size:0.85rem; border:1px solid var(--primary); color:var(--primary); font-weight:600; }
+        .file-chip i.remove-file { cursor: pointer; color: #ef4444; }
+
+        /* BUTTONS */
+        .btn-send { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; width: 100%; padding: 18px; border-radius: 16px; border: none; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 10px 25px -5px rgba(99,102,241,0.5); transition: 0.2s; }
+        .btn-send:hover { transform: translateY(-3px); box-shadow: 0 15px 35px -5px rgba(99,102,241,0.6); }
         .btn-send:active { transform: scale(0.98); }
 
-        /* EDITOR */
-        #editor-container { height: 300px; background: white; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; font-size: 16px; }
-        .ql-toolbar { border-top-left-radius: 12px; border-top-right-radius: 12px; background: #f1f5f9; border-color: var(--border)!important; }
-        .ql-container { border-color: var(--border)!important; font-family: 'Plus Jakarta Sans', sans-serif; }
+        /* HISTORY (NOUVEAU !) */
+        .history-list { list-style: none; padding: 0; margin: 0; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); transition: 0.2s; }
+        .history-item:last-child { border-bottom: none; }
+        .history-item:hover { background: #f8fafc; }
+        .history-info h4 { margin: 0 0 5px 0; font-size: 1rem; }
+        .history-info span { font-size: 0.8rem; color: #64748b; }
+        .history-stats { text-align: right; }
+        .badge { padding: 5px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; background: #eef2ff; color: var(--primary); }
 
-        /* AI BUTTON */
+        /* EDITOR & AI */
+        #editor-container { height: 300px; background: white; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; font-size: 16px; border: 2px solid var(--border); border-top: none; }
+        .ql-toolbar { border-top-left-radius: 12px; border-top-right-radius: 12px; background: #f8fafc; border: 2px solid var(--border)!important; }
+        .ql-container { border: none!important; font-family: 'Plus Jakarta Sans', sans-serif; }
         .ai-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        #btnAi { background: linear-gradient(135deg,#8b5cf6,#6366f1); color: white; border: none; border-radius: 12px; padding: 0 20px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+        #btnAi { background: linear-gradient(135deg,#8b5cf6,#6366f1); color: white; border: none; border-radius: 12px; padding: 0 25px; font-weight: 700; white-space: nowrap; cursor: pointer; transition:0.2s; box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3); }
+        #btnAi:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4); }
 
-        /* MODALS */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px; }
-        .modal-box { background: white; padding: 25px; border-radius: 24px; width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; max-height: 90vh; overflow-y: auto; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .plan-card { border: 1px solid var(--border); border-radius: 12px; padding: 15px; cursor: pointer; text-align: left; font-size: 0.9rem; transition:0.2s; display:flex; flex-direction:column; justify-content:space-between; }
-        .plan-card:hover { border-color: var(--primary); background: #f0fdfa; transform: translateY(-2px); }
-        .plan-price { font-weight: 800; margin-top: 5px; color: var(--text-main); font-size: 1.1rem; }
-        .pack-features { list-style: none; padding: 0; margin: 10px 0; font-size: 0.75rem; color: #64748b; }
-        .pack-features li { display: flex; gap: 5px; margin-bottom: 3px; }
+        /* MODALS & CHAT (Gardés de la version précédente) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px; }
+        .modal-box { background: white; padding: 30px; border-radius: 24px; width: 100%; max-width: 480px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 90vh; overflow-y: auto; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+        .plan-card { border: 2px solid var(--border); border-radius: 16px; padding: 15px; cursor: pointer; text-align: left; font-size: 0.9rem; transition:0.2s; display:flex; flex-direction:column; justify-content:space-between; position: relative; overflow: hidden; }
+        .plan-card:hover { border-color: var(--primary); background: #f5f3ff; transform: translateY(-5px); box-shadow: 0 10px 20px rgba(99,102,241,0.1); }
+        .plan-price { font-weight: 900; margin-top: 10px; color: var(--text-main); font-size: 1.2rem; display: block; }
+        .pack-features { list-style: none; padding: 0; margin: 15px 0 0 0; font-size: 0.8rem; color: #64748b; }
+        .pack-features li { display: flex; gap: 8px; margin-bottom: 5px; align-items: center; }
         
-        .btn-whatsapp { background: #25D366; color: white; width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: 700; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; font-size: 0.95rem; }
-        .btn-whatsapp:hover { background: #128C7E; }
-
-        .instruction-step { display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-start; }
-        .step-num { background: var(--primary); color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.8rem; flex-shrink: 0; }
-
-        /* CHATBOT & WIDGETS */
-        .chat-btn { position: fixed; bottom: 25px; right: 25px; width: 55px; height: 55px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; z-index: 5000; box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
-        .chat-window { position: fixed; bottom: 90px; right: 25px; width: 340px; height: 50vh; background: white; border-radius: 20px; display: none; flex-direction: column; z-index: 5000; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid var(--border); overflow: hidden; }
+        .chat-btn { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; z-index: 5000; box-shadow: 0 10px 25px rgba(99,102,241,0.5); transition: 0.2s; }
+        .chat-btn:hover { transform: scale(1.1) rotate(10deg); }
+        .chat-window { position: fixed; bottom: 100px; right: 25px; width: 360px; height: 55vh; background: white; border-radius: 24px; display: none; flex-direction: column; z-index: 5000; box-shadow: 0 20px 50px rgba(0,0,0,0.2); border: 1px solid var(--border); overflow: hidden; animation: slideUp 0.3s ease; }
         
-        /* MOBILE OPTIMIZATION */
-        @media (max-width: 768px) {
+        /* MOBILE */
+        @media (max-width: 900px) {
             body { padding: 15px; padding-bottom: 90px; }
             .header { flex-direction: column; align-items: flex-start; gap: 15px; }
-            .header-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+            .header-actions { width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
             .action-btn { justify-content: center; padding: 12px; font-size: 0.8rem; }
-            .action-btn span { display: none; } 
-            .action-btn i { font-size: 1.2rem; }
-            .stats-row { grid-template-columns: 1fr 1fr; }
-            .stats-row .stat-card:first-child { grid-column: 1 / -1; display: flex; flex-direction: row; align-items: center; justify-content: space-between; }
-            .stats-row .stat-card:first-child .btn-recharge { width: auto; margin: 0; }
+            .action-btn span { display: none; } .action-btn i { font-size: 1.3rem; }
+            .stats-row { grid-template-columns: 1fr; gap: 15px; }
             .main-grid { grid-template-columns: 1fr; gap: 20px; }
             .pricing-grid { grid-template-columns: 1fr; } 
-            .chat-window { width: 90%; left: 5%; right: 5%; bottom: 90px; height: 60vh; }
+            .chat-window { width: 92%; left: 4%; right: 4%; bottom: 95px; height: 65vh; }
         }
     </style>
 </head>
@@ -100,7 +113,7 @@
 
     <div class="wrapper">
         <div class="header">
-            <div class="brand"><h1>Newsletter SaaS</h1></div>
+            <div class="brand"><h1><i class="fa-solid fa-paper-plane"></i> Newsletter SaaS</h1></div>
             <div class="header-actions">
                 <button class="action-btn" onclick="openFeedback()"><i class="fa-regular fa-comment-dots"></i> <span>Avis</span></button>
                 <a href="/admin" id="adminBtn" class="action-btn" style="display:none; color:#ef4444; border-color:#fca5a5;"><i class="fa-solid fa-lock"></i> <span>Admin</span></a>
@@ -110,286 +123,288 @@
         </div>
 
         <div class="stats-row">
-            <div class="stat-card">
+            <div class="stat-card" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">
+                <i class="fa-solid fa-coins stat-icon" style="color:white; opacity:0.2;"></i>
                 <div>
-                    <h3>Crédits Dispo</h3>
-                    <p id="creditsDisplay">--</p>
+                    <h3 style="color:rgba(255,255,255,0.8);">Crédits Disponibles</h3>
+                    <p style="color:white;" id="creditsDisplay">--</p>
                 </div>
-                <button class="btn-recharge" onclick="openPayment()">+ Recharger</button>
+                <button class="btn-recharge" style="background:white; color:var(--primary);" onclick="openPayment()">+ Recharger</button>
             </div>
-            <div class="stat-card"><h3>Vues</h3><p id="opensDisplay">--</p></div>
-            <div class="stat-card"><h3>Contacts</h3><p id="countDisplay">0</p></div>
+            <div class="stat-card">
+                <i class="fa-regular fa-eye stat-icon"></i>
+                <h3>Vues Totales</h3><p id="opensDisplay">--</p>
+            </div>
+            <div class="stat-card">
+                <i class="fa-solid fa-users stat-icon"></i>
+                <h3>Contacts Chargés</h3><p id="countDisplay">0</p>
+            </div>
         </div>
 
         <div class="main-grid">
             <div class="card">
-                <h3><i class="fa-solid fa-users-line" style="color:var(--primary)"></i> Audience</h3>
-                <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-                    <i class="fa-solid fa-cloud-arrow-up" style="font-size:1.5rem; margin-bottom:5px;"></i><br>
-                    Importer (Excel/PDF)
-                    <input type="file" id="fileInput" accept=".pdf,.csv,.xlsx" style="display:none;" onchange="importFile()">
+                <h3><i class="fa-solid fa-users-line" style="color:var(--primary)"></i> Audience Cible</h3>
+                
+                <div class="upload-box" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    Glissez votre fichier ici (Excel/PDF)<br>ou cliquez pour importer
+                    <input type="file" id="fileInput" accept=".pdf,.csv,.xlsx" style="display:none;" onchange="importFile(this.files[0])">
                 </div>
-                <textarea id="emailList" style="height: 150px;" placeholder="Collez vos emails ici..."></textarea>
-                <div style="font-size:0.8rem; color:#64748b; margin-top:5px; text-align:right;" id="count">0 contacts</div>
+
+                <div style="position:relative;">
+                    <textarea id="emailList" style="height: 180px; font-family:monospace;" placeholder="Ex: client1@mail.com, Jean&#10;client2@mail.com"></textarea>
+                    <i class="fa-solid fa-eraser" style="position:absolute; bottom:15px; right:15px; cursor:pointer; color:#94a3b8;" title="Effacer la liste" onclick="clearList()"></i>
+                </div>
+                <div style="display:flex; justify-content:between; align-items:center; margin-top:10px;">
+                    <div style="font-size:0.9rem; color:#64748b; font-weight:600;" id="count">0 contacts valides</div>
+                </div>
             </div>
 
             <div class="card">
-                <h3><i class="fa-solid fa-pen-nib" style="color:var(--primary)"></i> Message</h3>
+                <h3><i class="fa-solid fa-pen-nib" style="color:var(--primary)"></i> Contenu du Mail</h3>
                 <div class="ai-group">
-                    <input type="text" id="aiTopic" placeholder="Sujet (ex: Promo -50%)" style="margin:0;">
-                    <button onclick="generateAI()" id="btnAi"><i class="fa-solid fa-wand-magic-sparkles"></i> IA</button>
+                    <input type="text" id="aiTopic" placeholder="Décrivez votre offre à l'IA (ex: Promo Ramadan -30%)" style="margin:0;">
+                    <button onclick="generateAI()" id="btnAi"><i class="fa-solid fa-wand-magic-sparkles"></i> Générer</button>
                 </div>
-                <input type="text" id="subject" placeholder="Objet du mail">
+                <input type="text" id="subject" placeholder="Objet irrésistible du mail...">
                 <div id="editor-container"></div>
                 
-                <label style="display:flex; align-items:center; gap:10px; margin-top:15px; cursor:pointer; background:#f1f5f9; padding:10px; border-radius:10px;">
-                    <i class="fa-solid fa-paperclip"></i> Ajouter une pièce jointe
-                    <input type="file" id="mailAttachment" style="display:none;" onchange="if(this.files[0]) alert('Fichier ajouté: '+this.files[0].name)">
-                </label>
+                <div class="attachment-area">
+                    <label style="cursor:pointer; display:flex; align-items:center; gap:10px; font-weight:600; color:#475569;">
+                        <i class="fa-solid fa-paperclip" style="font-size:1.2rem;"></i> Joindre un fichier
+                        <input type="file" id="mailAttachment" style="display:none;">
+                    </label>
+                    <div id="fileChip" class="file-chip">
+                        <span id="fileName">mon_catalogue.pdf</span>
+                        <i class="fa-solid fa-xmark remove-file" onclick="removeAttachment()"></i>
+                    </div>
+                </div>
             </div>
         </div>
 
         <button class="btn-send" onclick="sendMail()">
-            <i class="fa-solid fa-paper-plane"></i> Envoyer la campagne
+            <i class="fa-solid fa-paper-plane"></i> Lancer la Campagne
         </button>
+
+        <div class="card" style="margin-top:30px;">
+             <h3><i class="fa-solid fa-clock-rotate-left" style="color:var(--primary);"></i> Derniers Envois</h3>
+             <ul class="history-list" id="historyContainer">
+                 <li style="padding:20px; text-align:center; color:#64748b;">Chargement de l'historique...</li>
+             </ul>
+        </div>
     </div>
 
     <div id="paymentModal" class="modal-overlay">
         <div class="modal-box">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h2 style="margin:0; font-size:1.3rem;">Choisir un Pack</h2>
-                <i class="fa-solid fa-xmark" style="font-size:1.5rem; cursor:pointer;" onclick="document.getElementById('paymentModal').style.display='none'"></i>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0; font-size:1.5rem;">Recharger des crédits</h2>
+                <i class="fa-solid fa-xmark" style="font-size:1.5rem; cursor:pointer; color:#94a3b8;" onclick="document.getElementById('paymentModal').style.display='none'"></i>
             </div>
             
             <div id="step1">
                 <div class="pricing-grid">
                     <div class="plan-card" onclick="selectPack('starter', 3000)">
-                        <div>
-                            <b style="color:#0f172a;">STARTER</b>
-                            <ul class="pack-features">
-                                <li><i class="fa-solid fa-check" style="color:green;"></i> 500 Crédits</li>
-                                <li><i class="fa-solid fa-check" style="color:green;"></i> IA Basic</li>
-                                <li><i class="fa-solid fa-check" style="color:green;"></i> Support Standard</li>
-                            </ul>
-                        </div>
+                        <div><b style="font-size:1.1rem;">STARTER</b><ul class="pack-features"><li><i class="fa-solid fa-check" style="color:var(--success)"></i> 500 Crédits</li><li><i class="fa-solid fa-check" style="color:var(--success)"></i> IA Basic</li></ul></div>
                         <span class="plan-price">3 000 FCFA</span>
                     </div>
-                    <div class="plan-card" style="border-color:var(--primary); background:#eef2ff;" onclick="selectPack('pro', 10000)">
-                        <div>
-                            <b style="color:var(--primary);">PRO</b>
-                            <ul class="pack-features">
-                                <li><i class="fa-solid fa-check" style="color:green;"></i> 2 000 Crédits</li>
-                                <li><i class="fa-solid fa-check" style="color:green;"></i> IA Avancée</li>
-                                <li><i class="fa-solid fa-check" style="color:green;"></i> Priorité d'envoi</li>
-                            </ul>
-                        </div>
-                        <span class="plan-price">10 000 FCFA</span>
+                    <div class="plan-card" style="border-color:var(--primary); background:#f5f3ff;" onclick="selectPack('pro', 10000)">
+                        <div style="position:absolute; top:0; right:0; background:var(--primary); color:white; padding:3px 10px; font-size:0.7rem; font-weight:bold; border-bottom-left-radius:10px;">POPULAIRE</div>
+                        <div><b style="font-size:1.1rem; color:var(--primary);">PRO</b><ul class="pack-features"><li><i class="fa-solid fa-check" style="color:var(--success)"></i> 2 000 Crédits</li><li><i class="fa-solid fa-check" style="color:var(--success)"></i> IA Avancée +</li><li><i class="fa-solid fa-check" style="color:var(--success)"></i> Priorité</li></ul></div>
+                        <span class="plan-price" style="color:var(--primary);">10 000 FCFA</span>
                     </div>
                     <div class="plan-card" onclick="selectPack('business', 20000)">
-                        <div>
-                            <b style="color:#0f172a;">BUSINESS</b>
-                            <ul class="pack-features">
-                                <li><i class="fa-solid fa-check" style="color:green;"></i> 5 000 Crédits</li>
-                                <li><i class="fa-solid fa-check" style="color:green;"></i> Support VIP</li>
-                                <li><i class="fa-solid fa-check" style="color:green;"></i> Tracking Pro</li>
-                            </ul>
-                        </div>
+                        <div><b style="font-size:1.1rem;">BUSINESS</b><ul class="pack-features"><li><i class="fa-solid fa-check" style="color:var(--success)"></i> 5 000 Crédits</li><li><i class="fa-solid fa-check" style="color:var(--success)"></i> Support VIP</li><li><i class="fa-solid fa-check" style="color:var(--success)"></i> Max Délivrabilité</li></ul></div>
                         <span class="plan-price">20 000 FCFA</span>
                     </div>
                 </div>
             </div>
 
             <div id="step2" style="display:none;">
-                <h3 style="margin:0 0 15px 0; color:var(--primary); text-align:center;">Finaliser le Paiement</h3>
+                <div style="background:#fff7ed; border:2px solid #fdba74; padding:20px; border-radius:16px; margin-bottom:20px;">
+                    <h3 style="margin:0 0 15px 0; color:#c2410c; display:flex; align-items:center; gap:10px;"><span style="background:#c2410c; color:white; width:25px; height:25px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:0.9rem;">1</span> Envoyez <span id="amountToPay" style="font-weight:900;"></span> FCFA</h3>
+                    <p style="margin:5px 0 5px 35px; font-weight:600; font-size:1.1rem;">🟠 Orange Money : 658 98 00 51</p>
+                    <p style="margin:5px 0 15px 35px; font-weight:600; font-size:1.1rem;">🟡 MTN MoMo : 653 76 33 93/p>
+                    <p style="margin:0 0 0 35px; font-size:0.9rem; color:#ea580c;">(Nom bénéficiaire : Gabriel Ezekiel Junior Fokou)</p>
+                </div>
                 
-                <div class="instruction-step">
-                    <div class="step-num">1</div>
-                    <div style="font-size:0.9rem;">
-                        Envoyez <b><span id="amountToPay"></span> FCFA</b> par Mobile Money :
-                        <div style="margin-top:5px; font-weight:bold;">
-                            🟠 Orange: 658 98 00 51<br>
-                            🟡 MTN: 653 76 33 93
-                        </div>
-                        <div style="font-size:0.8rem; color:#666;">(Nom: Gabriel Ezekiel Junior Fokou)</div>
-                    </div>
+                <div style="margin-bottom:20px;">
+                    <h3 style="margin:0 0 10px 0; display:flex; align-items:center; gap:10px;"><span style="background:var(--text-main); color:white; width:25px; height:25px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:0.9rem;">2</span> Preuve de paiement</h3>
+                    <input type="text" id="payRef" placeholder="Entrez l'ID de transaction ou votre numéro..." style="font-size:1rem; padding:15px; border:2px solid #cbd5e1;">
                 </div>
 
-                <div class="instruction-step">
-                    <div class="step-num">2</div>
-                    <div style="width:100%;">
-                        <label style="font-size:0.9rem; font-weight:600;">Saisissez l'ID de Transaction ou votre Numéro :</label>
-                        <input type="tel" id="payRef" placeholder="Ex: 699 99..." style="font-size:1rem; padding:12px;">
-                    </div>
-                </div>
+                <button onclick="sendPaymentRequest()" class="btn-send" style="margin-top:10px;">Valider mon rechargement</button>
 
-                <div class="instruction-step">
-                    <div class="step-num">3</div>
-                    <div style="font-size:0.9rem;">Cliquez sur valider. Vos crédits seront ajoutés après vérification (max 10 min).</div>
-                </div>
-
-                <button onclick="sendPaymentRequest()" class="btn-send" style="margin-top:10px;">Valider le paiement</button>
-
-                <a href="https://wa.me/237658980051" target="_blank" class="btn-whatsapp">
-                    <i class="fa-brands fa-whatsapp" style="font-size:1.2rem;"></i> Un problème ? Contactez-nous
+                <a href="https://wa.me/237658980051?text=Bonjour,%20j'ai%20un%20problème%20avec%20mon%20paiement%20NewsletterSaaS" target="_blank" style="background:#25D366; color:white; width:100%; padding:15px; border-radius:16px; border:none; font-weight:700; margin-top:15px; display:flex; justify-content:center; align-items:center; gap:10px; text-decoration:none; font-size:1rem; transition:0.2s; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);">
+                    <i class="fa-brands fa-whatsapp" style="font-size:1.4rem;"></i> Un problème ? Contactez-nous sur WhatsApp
                 </a>
 
-                <div style="text-align:center; margin-top:15px; text-decoration:underline; cursor:pointer; color:#64748b;" onclick="resetPay()">Retour au choix</div>
+                <div style="text-align:center; margin-top:20px; text-decoration:underline; cursor:pointer; color:#64748b; font-weight:600;" onclick="resetPay()">← Choisir un autre pack</div>
             </div>
         </div>
     </div>
 
     <div class="chat-btn" onclick="toggleChat()"><i class="fa-solid fa-robot"></i></div>
     <div class="chat-window" id="chatWindow">
-        <div style="background:var(--primary); color:white; padding:15px; font-weight:bold; display:flex; justify-content:space-between;">
-            <span>Assistant</span> <i class="fa-solid fa-xmark" onclick="toggleChat()"></i>
+        <div style="background:var(--primary); color:white; padding:20px; font-weight:800; display:flex; justify-content:space-between; align-items:center; font-size:1.1rem;">
+            <span><i class="fa-solid fa-robot"></i> Assistant IA</span> <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="toggleChat()"></i>
         </div>
-        <div class="chat-body" id="chatBody"><div style="background:white; border:1px solid #e2e8f0; padding:8px 12px; border-radius:12px; display:inline-block; font-size:0.9rem;">Bonjour ! Comment puis-je vous aider ?</div></div>
-        <div class="chat-footer">
-            <input type="text" id="chatInput" placeholder="Écrivez ici..." style="margin:0; border-radius:20px;">
-            <button onclick="sendChat()" style="background:var(--primary); color:white; border:none; width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-paper-plane"></i></button>
+        <div class="chat-body" id="chatBody" style="flex:1; padding:20px; overflow-y:auto; background:#f8fafc;">
+            <div style="background:white; border:1px solid #e2e8f0; padding:12px 16px; border-radius:16px; border-bottom-left-radius:4px; display:inline-block; font-weight:500; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">Bonjour ! Je suis là pour vous aider. Posez-moi une question sur l'emailing.</div>
         </div>
-    </div>
-
-    <div id="configModal" class="modal-overlay">
-        <div class="modal-box">
-            <h3>Configuration Gmail</h3>
-            <p style="color:#666; font-size:0.9rem; margin-bottom:15px;">Utilisez votre propre adresse d'envoi (Optionnel).</p>
-            <input type="email" id="smtpUser" placeholder="votre@gmail.com">
-            <input type="password" id="smtpPass" placeholder="Mot de passe d'application">
-            <button onclick="saveConfig()" class="btn-send">Enregistrer</button>
-            <div style="text-align:center; margin-top:15px; text-decoration:underline; cursor:pointer;" onclick="document.getElementById('configModal').style.display='none'">Fermer</div>
+        <div class="chat-footer" style="padding:15px; background:white; border-top:1px solid var(--border); display:flex; gap:10px;">
+            <input type="text" id="chatInput" placeholder="Écrivez votre message..." style="margin:0; border-radius:50px; padding-left:20px;">
+            <button onclick="sendChat()" style="background:var(--primary); color:white; border:none; width:55px; height:55px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow: 0 5px 15px rgba(99,102,241,0.3); transition:0.2s;"><i class="fa-solid fa-paper-plane" style="font-size:1.2rem;"></i></button>
         </div>
     </div>
 
-    <div id="feedbackModal" class="modal-overlay">
-        <div class="modal-box">
-            <h3>Votre avis</h3>
-            <select id="feedType"><option value="suggestion">💡 Suggestion</option><option value="bug">🐛 Bug</option></select>
-            <textarea id="feedMsg" placeholder="Votre message..." style="height:100px;"></textarea>
-            <button onclick="sendFeedback()" class="btn-send">Envoyer</button>
-            <div style="text-align:center; margin-top:15px; text-decoration:underline; cursor:pointer;" onclick="document.getElementById('feedbackModal').style.display='none'">Fermer</div>
-        </div>
-    </div>
+    <div id="configModal" class="modal-overlay"> <div class="modal-box"> <h3>SMTP Perso (Expert)</h3> <input type="text" id="smtpUser" placeholder="Email Gmail"> <input type="password" id="smtpPass" placeholder="Mot de passe d'application"> <button onclick="saveConfig()" class="btn-send">Sauvegarder</button> <div class="close-modal" onclick="document.getElementById('configModal').style.display='none'" style="text-align:center; margin-top:15px; cursor:pointer; text-decoration:underline;">Fermer</div> </div> </div>
+    <div id="feedbackModal" class="modal-overlay"> <div class="modal-box"> <h3>Donnez votre avis</h3> <select id="feedType"><option value="suggestion">💡 Suggestion</option><option value="bug">🐛 Signaler un Bug</option></select> <textarea id="feedMsg" style="height:120px;" placeholder="Votre message nous aide à nous améliorer..."></textarea> <button onclick="sendFeedback()" class="btn-send">Envoyer</button> <div class="close-modal" onclick="document.getElementById('feedbackModal').style.display='none'" style="text-align:center; margin-top:15px; cursor:pointer; text-decoration:underline;">Fermer</div> </div> </div>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
-        var quill = new Quill('#editor-container', { theme: 'snow', modules: { toolbar: [['bold', 'italic'], [{ 'list': 'bullet' }], ['link']] } }); // Toolbar simplifiée Mobile
-        
-        // INIT
+        // --- INIT & VARIABLES ---
+        var quill = new Quill('#editor-container', { theme: 'snow', modules: { toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'bullet' }], ['link', 'clean']] }, placeholder: 'Rédigez votre meilleur message ici...' });
+        const token = localStorage.getItem('token'); if (!token) window.location.href = '/login';
+        const emailList = document.getElementById('emailList');
+        const fileInput = document.getElementById('mailAttachment');
+        const dropZone = document.getElementById('dropZone');
+
+        // --- CHARGEMENT INITIAL ---
         if(localStorage.getItem('isAdmin')==='true') document.getElementById('adminBtn').style.display='flex';
         document.getElementById('creditsDisplay').innerText = localStorage.getItem('credits') || "--";
         document.getElementById('opensDisplay').innerText = localStorage.getItem('opens') || "0";
-        
-        // AUTO SAVE & COUNT
-        const emailList = document.getElementById('emailList');
-        emailList.addEventListener('input', (e) => { localStorage.setItem('d_list', e.target.value); updateCount(); });
         if(localStorage.getItem('d_list')) { emailList.value = localStorage.getItem('d_list'); updateCount(); }
+        loadHistory(); // Charger l'historique au démarrage
 
-        function updateCount() {
-            const count = emailList.value.split('\n').filter(l=>l.includes('@')).length;
-            document.getElementById('count').innerText = count + " contacts";
-            document.getElementById('countDisplay').innerText = count;
-        }
+        // --- ÉVÉNEMENTS & INTERACTIVITÉ ---
+        emailList.addEventListener('input', (e) => { localStorage.setItem('d_list', e.target.value); updateCount(); });
+        function updateCount() { const c = emailList.value.split('\n').filter(l=>l.includes('@')).length; document.getElementById('count').innerText = c + " contacts valides"; document.getElementById('countDisplay').innerText = c; }
+        function clearList() { if(confirm('Effacer toute la liste ?')) { emailList.value = ''; localStorage.removeItem('d_list'); updateCount(); } }
 
-        // PAIEMENT
-        let currentPack = '';
-        function openPayment() { document.getElementById('paymentModal').style.display='flex'; resetPay(); }
-        function selectPack(pack, price) {
-            currentPack = pack;
-            document.getElementById('step1').style.display='none';
-            document.getElementById('step2').style.display='block';
-            document.getElementById('amountToPay').innerText = price.toLocaleString();
-        }
-        function resetPay() { document.getElementById('step1').style.display='block'; document.getElementById('step2').style.display='none'; }
-        
-        async function sendPaymentRequest() {
-            const ref = document.getElementById('payRef').value;
-            if(!ref) return alert("Numéro manquant");
+        // DRAG & DROP Fichier Contacts
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => { dropZone.addEventListener(eventName, preventDefaults, false); });
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+        ['dragenter', 'dragover'].forEach(eventName => { dropZone.addEventListener(eventName, highlight, false); });
+        ['dragleave', 'drop'].forEach(eventName => { dropZone.addEventListener(eventName, unhighlight, false); });
+        function highlight(e) { dropZone.classList.add('dragover'); }
+        function unhighlight(e) { dropZone.classList.remove('dragover'); }
+        dropZone.addEventListener('drop', handleDrop, false);
+        function handleDrop(e) { const dt = e.dataTransfer; const files = dt.files; if(files.length) importFile(files[0]); }
+
+        // GESTION PIÈCE JOINTE MAIL
+        fileInput.addEventListener('change', function(e) {
+            if(this.files && this.files[0]) {
+                document.getElementById('fileName').innerText = this.files[0].name.length > 20 ? this.files[0].name.substring(0,20)+'...' : this.files[0].name;
+                document.getElementById('fileChip').style.display = 'inline-flex';
+            }
+        });
+        function removeAttachment() { fileInput.value = ''; document.getElementById('fileChip').style.display = 'none'; }
+
+        // --- FONCTIONS CORE ---
+        async function loadHistory() {
+            const container = document.getElementById('historyContainer');
             try {
-                await fetch('/api/payment/declare', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body:JSON.stringify({ pack: currentPack, ref }) });
-                alert("✅ Envoyé ! Validation en cours."); document.getElementById('paymentModal').style.display='none';
-            } catch(e) { alert("Erreur connexion"); }
+                const res = await fetch('/api/history', { headers: { 'Authorization': 'Bearer ' + token } });
+                const data = await res.json();
+                if (data.campaigns && data.campaigns.length > 0) {
+                    container.innerHTML = data.campaigns.map(c => `
+                        <li class="history-item">
+                            <div class="history-info">
+                                <h4>${c.subject.length > 30 ? c.subject.substring(0,30)+'...' : c.subject}</h4>
+                                <span><i class="fa-regular fa-calendar"></i> ${new Date(c.sentAt).toLocaleDateString()}</span>
+                            </div>
+                            <div class="history-stats">
+                                <span class="badge"><i class="fa-solid fa-paper-plane"></i> ${c.recipientCount} envoyés</span>
+                            </div>
+                        </li>
+                    `).join('');
+                } else { container.innerHTML = '<li style="padding:20px; text-align:center; color:#94a3b8;">Aucune campagne récente.</li>'; }
+            } catch(e) { container.innerHTML = '<li style="color:red; padding:15px;">Erreur chargement historique.</li>'; }
         }
 
-        // CORE FUNCTIONS
-        async function importFile() {
-            const fi = document.getElementById('fileInput');
-            if(!fi.files.length) return;
-            const fd = new FormData(); fd.append('file', fi.files[0]);
+        async function importFile(file) {
+            if(!file) return;
+            dropZone.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Traitement en cours...";
+            const fd = new FormData(); fd.append('file', file);
             try {
                 const res = await fetch('/extract-file', { method:'POST', headers:{'Authorization':'Bearer '+token}, body:fd });
                 const data = await res.json();
                 emailList.value += (emailList.value?'\n':'') + data.contacts.join('\n');
-                updateCount();
-            } catch(e){ alert("Erreur import"); }
+                updateCount(); localStorage.setItem('d_list', emailList.value);
+            } catch(e){ alert("Erreur lors de l'importation du fichier."); }
+            dropZone.innerHTML = "<i class='fa-solid fa-cloud-arrow-up'></i> Glissez votre fichier ici (Excel/PDF)<br>ou cliquez pour importer";
         }
 
         async function generateAI() {
-            const btn = document.getElementById('btnAi'); 
-            const originalText = btn.innerHTML;
-            btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i>";
+            const btn = document.getElementById('btnAi'); const topic = document.getElementById('aiTopic').value;
+            if(!topic) return alert("Entrez un sujet pour l'IA");
+            const originalText = btn.innerHTML; btn.innerHTML = "<i class='fa-solid fa-wand-magic-sparkles fa-spin'></i> Rédaction..."; btn.disabled = true;
             try {
-                const res = await fetch('/generate-content', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body:JSON.stringify({topic:document.getElementById('aiTopic').value}) });
+                const res = await fetch('/generate-content', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body:JSON.stringify({topic}) });
                 const data = await res.json();
-                document.getElementById('subject').value = data.subject;
-                quill.root.innerHTML = data.body;
-            } catch(e){ alert("Erreur IA"); }
-            btn.innerHTML = originalText;
+                document.getElementById('subject').value = data.subject; quill.root.innerHTML = data.body;
+            } catch(e){ alert("L'IA est surchargée, réessayez."); }
+            btn.innerHTML = originalText; btn.disabled = false;
         }
 
         async function sendMail() {
             const list = emailList.value.split('\n').filter(l=>l.includes('@')).map(l=>{const p=l.split(','); return {email:p[0].trim(), name:p[1]||''}});
-            if(!list.length) return alert("Ajoutez des contacts !");
+            if(!list.length) return alert("Veuillez ajouter des contacts valides.");
+            if(!document.getElementById('subject').value) return alert("Sujet manquant.");
             
-            const btn = document.querySelector('.btn-send');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = "<i class='fa-solid fa-circle-notch fa-spin'></i> Envoi...";
-            btn.disabled = true;
+            const btn = document.querySelector('.btn-send'); const originalText = btn.innerHTML;
+            btn.innerHTML = "<i class='fa-solid fa-circle-notch fa-spin'></i> Envoi en cours..."; btn.disabled = true;
 
-            const fd = new FormData();
-            fd.append('recipients', JSON.stringify(list));
-            fd.append('subject', document.getElementById('subject').value);
-            fd.append('message', quill.root.innerHTML);
-            if(document.getElementById('mailAttachment').files[0]) fd.append('attachment', document.getElementById('mailAttachment').files[0]);
+            const fd = new FormData(); fd.append('recipients', JSON.stringify(list)); fd.append('subject', document.getElementById('subject').value); fd.append('message', quill.root.innerHTML);
+            if(fileInput.files[0]) fd.append('attachment', fileInput.files[0]);
 
             try {
                 const res = await fetch('/send-mail', { method:'POST', headers:{'Authorization':'Bearer '+token}, body:fd });
                 const data = await res.json();
                 if(data.success) {
-                    alert(`✅ ${data.count} Mails envoyés !`);
-                    localStorage.setItem('credits', data.newCredits);
-                    document.getElementById('creditsDisplay').innerText = data.newCredits;
+                    alert(`🎉 Succès ! ${data.count} mails envoyés.`);
+                    localStorage.setItem('credits', data.newCredits); document.getElementById('creditsDisplay').innerText = data.newCredits;
+                    loadHistory(); // Recharger l'historique
                 } else { alert("Erreur: " + data.error); }
-            } catch(e) { alert("Erreur technique"); }
-            
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+            } catch(e) { alert("Erreur technique lors de l'envoi."); }
+            btn.innerHTML = originalText; btn.disabled = false;
         }
 
-        // CHAT & MODALS
-        function toggleChat() { const w=document.getElementById('chatWindow'); w.style.display = w.style.display==='flex'?'none':'flex'; }
+        // --- PAIEMENT & CHAT ---
+        let currentPack = '';
+        function openPayment() { document.getElementById('paymentModal').style.display='flex'; resetPay(); }
+        function selectPack(pack, price) { currentPack = pack; document.getElementById('step1').style.display='none'; document.getElementById('step2').style.display='block'; document.getElementById('amountToPay').innerText = price.toLocaleString(); }
+        function resetPay() { document.getElementById('step1').style.display='block'; document.getElementById('step2').style.display='none'; document.getElementById('payRef').value=''; }
+        
+        async function sendPaymentRequest() {
+            const ref = document.getElementById('payRef').value; if(!ref || ref.length < 5) return alert("Veuillez entrer une référence ou un numéro valide.");
+            const btn = document.querySelector('#step2 .btn-send'); btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Validation..."; btn.disabled = true;
+            try {
+                await fetch('/api/payment/declare', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body:JSON.stringify({ pack: currentPack, ref }) });
+                alert("✅ Demande reçue ! Vos crédits seront validés dans quelques minutes après vérification."); document.getElementById('paymentModal').style.display='none';
+            } catch(e) { alert("Erreur de connexion."); }
+            btn.innerHTML = "Valider le paiement"; btn.disabled = false;
+        }
+
+        function toggleChat() { const w=document.getElementById('chatWindow'); w.style.display = w.style.display==='flex'?'none':'flex'; if(w.style.display==='flex') document.getElementById('chatInput').focus(); }
         async function sendChat() {
-            const i = document.getElementById('chatInput');
-            const txt = i.value; if(!txt) return;
-            const b = document.getElementById('chatBody');
-            b.innerHTML += `<div style="text-align:right; margin:8px 0;"><span style="background:var(--primary); color:white; padding:8px 12px; border-radius:12px; display:inline-block;">${txt}</span></div>`;
-            i.value='';
-            const res = await fetch('/api/assist', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body:JSON.stringify({question:txt}) });
-            const data = await res.json();
-            b.innerHTML += `<div style="margin:8px 0;"><span style="background:white; border:1px solid #e2e8f0; padding:8px 12px; border-radius:12px; display:inline-block; font-size:0.9rem;">${data.reply}</span></div>`;
-            b.scrollTop = b.scrollHeight;
+            const i = document.getElementById('chatInput'); const txt = i.value.trim(); if(!txt) return;
+            const b = document.getElementById('chatBody'); const btn = document.querySelector('.chat-footer button');
+            b.innerHTML += `<div style="text-align:right; margin:10px 0;"><span style="background:var(--primary); color:white; padding:10px 15px; border-radius:16px; border-bottom-right-radius:4px; display:inline-block; font-weight:500; box-shadow: 0 2px 5px rgba(99,102,241,0.2);">${txt}</span></div>`;
+            i.value=''; b.scrollTop = b.scrollHeight; btn.disabled = true;
+            try {
+                const res = await fetch('/api/assist', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body:JSON.stringify({question:txt}) });
+                const data = await res.json();
+                b.innerHTML += `<div style="margin:10px 0;"><span style="background:white; border:1px solid #e2e8f0; padding:10px 15px; border-radius:16px; border-bottom-left-radius:4px; display:inline-block; font-size:0.95rem; font-weight:500; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">${data.reply}</span></div>`;
+            } catch(e) { b.innerHTML += `<div style="margin:10px 0; color:red;">Erreur de connexion à l'assistant.</div>`; }
+            b.scrollTop = b.scrollHeight; btn.disabled = false; i.focus();
         }
 
         function openFeedback() { document.getElementById('feedbackModal').style.display='flex'; }
-        async function sendFeedback() {
-             await fetch('/api/feedback', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body:JSON.stringify({type:document.getElementById('feedType').value, message:document.getElementById('feedMsg').value}) });
-             alert("Merci !"); document.getElementById('feedbackModal').style.display='none';
-        }
+        async function sendFeedback() { const msg = document.getElementById('feedMsg').value; if(!msg) return alert("Message vide"); await fetch('/api/feedback', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body:JSON.stringify({type:document.getElementById('feedType').value, message:msg}) }); alert("Merci pour votre retour !"); document.getElementById('feedbackModal').style.display='none'; document.getElementById('feedMsg').value=''; }
         function openConfig() { document.getElementById('configModal').style.display='flex'; }
-        async function saveConfig() {
-            await fetch('/api/settings/smtp', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body:JSON.stringify({smtpUser:document.getElementById('smtpUser').value, smtpPass:document.getElementById('smtpPass').value}) });
-            alert("Sauvegardé"); document.getElementById('configModal').style.display='none';
-        }
+        async function saveConfig() { await fetch('/api/settings/smtp', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body:JSON.stringify({smtpUser:document.getElementById('smtpUser').value, smtpPass:document.getElementById('smtpPass').value}) }); alert("Configuration sauvegardée."); document.getElementById('configModal').style.display='none'; }
+        function logout() { localStorage.clear(); window.location.href = '/login'; }
     </script>
 </body>
 </html>
