@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "echo 'Build complet ! Pas de compilation nécessaire pour Node.js'"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
