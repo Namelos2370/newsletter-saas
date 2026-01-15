@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
         :root { --primary: #6366f1; --primary-dark: #4f46e5; --bg: #f1f5f9; --text-main: #0f172a; --border: #e2e8f0; --radius: 16px; --success: #10b981; --whatsapp: #25D366; }
@@ -14,15 +15,15 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 20px; min-height: 100vh; padding-bottom: 100px; }
         .wrapper { max-width: 1200px; margin: 0 auto; }
         
-        /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px; }
+        /* HEADER (CORRECTIF Z-INDEX) */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px; position: relative; z-index: 100; }
         .brand h1 { font-size: 1.4rem; font-weight: 800; margin: 0; color: var(--primary); letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
         .header-actions { display: flex; gap: 10px; }
         .action-btn { background: white; border: 1px solid var(--border); padding: 10px 16px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.85rem; color: #475569; transition: all 0.2s ease; text-decoration: none; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .action-btn:hover { transform: translateY(-2px); border-color: var(--primary); color: var(--primary); box-shadow: 0 5px 12px rgba(99,102,241,0.2); }
         
         /* STATS */
-        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; position: relative; z-index: 1; }
         .stat-card { background: white; padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); position: relative; overflow: hidden; transition: all 0.3s ease; }
         .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--primary); }
         .stat-card h3 { margin: 0; font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
@@ -38,51 +39,53 @@
         input, textarea, select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; background: #f8fafc; font-size: 0.95rem; font-family: inherit; margin-top: 8px; outline: none; transition: 0.2s; }
         input:focus, textarea:focus { border-color: var(--primary); background: white; }
         
-        /* UPLOAD & ATTACHMENT */
+        /* UPLOAD & TOOLS */
         .upload-box { border: 2px dashed #cbd5e1; padding: 30px; text-align: center; border-radius: 16px; cursor: pointer; margin-bottom: 15px; background: #f8fafc; color: #64748b; font-weight: 600; transition: all 0.2s; }
         .upload-box:hover { border-color: var(--primary); background: #eef2ff; color: var(--primary); }
+        .tools-row { display: flex; gap: 10px; margin-top: 10px; }
+        .tool-btn { flex: 1; padding: 10px; border: 1px solid var(--border); background: white; border-radius: 10px; cursor: pointer; font-size: 0.8rem; font-weight: 600; color: #475569; display: flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s; }
+        .tool-btn:hover { background: #f8fafc; border-color: var(--text-main); color: var(--text-main); }
+        #qrResult { margin-top: 15px; display: none; text-align: center; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px dashed #cbd5e1; }
+        #qrcode { display: inline-block; margin: 10px 0; }
+
+        /* EDITOR */
         .attachment-area { display:flex; align-items:center; gap:10px; margin-top:15px; background:#f1f5f9; padding:10px 15px; border-radius:12px; border: 1px solid var(--border); }
         .file-chip { display:none; align-items:center; gap:10px; background:white; padding:5px 10px; border-radius:50px; font-size:0.85rem; border:1px solid var(--primary); color:var(--primary); font-weight:600; }
-
-        /* BOUTON WHATSAPP TOOL */
         .wa-tool { background: #dcfce7; border: 1px solid #86efac; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
         .wa-row { display: flex; gap: 10px; align-items: center; }
         .btn-add-wa { background: var(--whatsapp); color: white; border: none; padding: 0 20px; border-radius: 10px; font-weight: 700; cursor: pointer; height: 48px; white-space: nowrap; }
-        .btn-add-wa:hover { background: #15803d; }
-
-        /* BUTTONS */
         .btn-send { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; width: 100%; padding: 18px; border-radius: 16px; border: none; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 10px 25px -5px rgba(99,102,241,0.5); transition: 0.2s; }
         .btn-send:hover { transform: translateY(-3px); }
-
-        /* HISTORY */
+        
         .history-list { list-style: none; padding: 0; margin: 0; }
         .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); transition: 0.2s; }
-        .history-item:hover { background: #f8fafc; }
         .badge { padding: 5px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; background: #eef2ff; color: var(--primary); }
-
-        /* EDITOR */
         #editor-container { height: 300px; background: white; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; font-size: 16px; border: 2px solid var(--border); border-top: none; }
         .ql-toolbar { border-top-left-radius: 12px; border-top-right-radius: 12px; background: #f8fafc; border: 2px solid var(--border)!important; }
         .ql-container { border: none!important; font-family: 'Plus Jakarta Sans', sans-serif; }
         
-        /* AI BUTTON & MICRO */
         .ai-group { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
         #btnAi { background: linear-gradient(135deg,#8b5cf6,#6366f1); color: white; border: none; border-radius: 12px; padding: 0 20px; font-weight: 700; white-space: nowrap; cursor: pointer; height: 50px; }
         .mic-active { color: red !important; animation: beat 1s infinite; }
         @keyframes beat { 0% { transform: translateY(-50%) scale(1); } 50% { transform: translateY(-50%) scale(1.2); } 100% { transform: translateY(-50%) scale(1); } }
 
-        /* MODALS (Standard) */
+        /* MODALS */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px; }
         .modal-box { background: white; padding: 30px; border-radius: 24px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
         .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
         .plan-card { border: 2px solid var(--border); border-radius: 16px; padding: 15px; cursor: pointer; text-align: left; }
-        .plan-card:hover { border-color: var(--primary); background: #f5f3ff; }
-        .pack-features { list-style: none; padding: 0; margin: 15px 0 0 0; font-size: 0.8rem; color: #64748b; }
         
-        /* CHATBOT */
+        /* CHATBOT & TYPING ANIMATION */
         .chat-btn { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; z-index: 5000; }
         .chat-window { position: fixed; bottom: 100px; right: 25px; width: 360px; height: 55vh; background: white; border-radius: 24px; display: none; flex-direction: column; z-index: 5000; border: 1px solid var(--border); overflow: hidden; }
         
+        /* Animation "Écrit..." WhatsApp */
+        .typing { display: inline-flex; gap: 5px; background: white; padding: 12px 16px; border-radius: 16px; border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; margin: 10px 0; width: fit-content; }
+        .dot { width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
         @media (max-width: 900px) {
             body { padding: 15px; padding-bottom: 90px; }
             .header { flex-direction: column; align-items: flex-start; }
@@ -98,7 +101,14 @@
     <script>
         const token = localStorage.getItem('token');
         if (!token) window.location.href = '/login';
-        function logout() { localStorage.clear(); window.location.href = '/login'; }
+        
+        // --- LOGOUT SECURISE ---
+        function logout() { 
+            if(confirm("Voulez-vous vraiment vous déconnecter ?")) {
+                localStorage.clear(); 
+                window.location.href = '/login'; 
+            }
+        }
     </script>
 
     <div class="wrapper">
@@ -122,14 +132,31 @@
         </div>
 
         <div class="main-grid">
-            <div class="card">
-                <h3><i class="fa-solid fa-users-line" style="color:var(--primary)"></i> Audience</h3>
-                <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Importer Fichier
-                    <input type="file" id="fileInput" accept=".pdf,.csv,.xlsx" style="display:none;" onchange="importFile(this.files[0])">
+            <div style="display:flex; flex-direction:column; gap:25px;">
+                <div class="card">
+                    <h3><i class="fa-solid fa-users-line" style="color:var(--primary)"></i> Audience</h3>
+                    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Importer Fichier
+                        <input type="file" id="fileInput" accept=".pdf,.csv,.xlsx" style="display:none;" onchange="importFile(this.files[0])">
+                    </div>
+                    <textarea id="emailList" style="height: 180px; font-family:monospace;" placeholder="Ex: client1@mail.com"></textarea>
+                    
+                    <div class="tools-row">
+                        <button class="tool-btn" onclick="cleanList()"><i class="fa-solid fa-broom"></i> Nettoyer</button>
+                        <div style="font-size:0.9rem; color:#64748b; font-weight:600; padding:10px;" id="count">0 contacts</div>
+                    </div>
                 </div>
-                <textarea id="emailList" style="height: 180px; font-family:monospace;" placeholder="Ex: client1@mail.com"></textarea>
-                <div style="font-size:0.9rem; color:#64748b; font-weight:600; text-align:right;" id="count">0 contacts</div>
+
+                <div class="card">
+                    <h3><i class="fa-solid fa-toolbox" style="color:#f59e0b;"></i> Outils Boutique</h3>
+                    <p style="font-size:0.85rem; color:#64748b; margin-top:5px;">QR Code pour inscription WhatsApp.</p>
+                    <input type="text" id="qrNumber" placeholder="Numéro WhatsApp (ex: 237...)" style="margin-top:10px;">
+                    <button class="btn-recharge" onclick="generateQR()" style="margin-top:10px; background:#0f172a; border-radius:10px;">Générer QR Code</button>
+                    <div id="qrResult">
+                        <div id="qrcode"></div>
+                        <p style="font-size:0.8rem; font-weight:bold; margin-top:10px;">À imprimer !</p>
+                    </div>
+                </div>
             </div>
 
             <div class="card">
@@ -144,10 +171,10 @@
                 </div>
 
                 <div class="wa-tool">
-                    <div style="font-size:0.85rem; color:#166534; font-weight:700;"><i class="fa-brands fa-whatsapp"></i> Booster les ventes</div>
+                    <div style="font-size:0.85rem; color:#166534; font-weight:700;"><i class="fa-brands fa-whatsapp"></i> Bouton WhatsApp</div>
                     <div class="wa-row">
                         <input type="tel" id="waNumber" placeholder="Numéro (237...)" style="margin:0; border:1px solid #86efac;">
-                        <button class="btn-add-wa" onclick="insertWaBtn()">Ajouter Bouton</button>
+                        <button class="btn-add-wa" onclick="insertWaBtn()">Ajouter</button>
                     </div>
                 </div>
 
@@ -161,10 +188,10 @@
                     </label>
                     <div id="fileChip" class="file-chip"><span id="fileName">...</span> <i class="fa-solid fa-xmark remove-file" onclick="removeAttachment()"></i></div>
                 </div>
+
+                <button class="btn-send" onclick="sendMail()" style="margin-top:20px;"><i class="fa-solid fa-paper-plane"></i> Lancer la Campagne</button>
             </div>
         </div>
-
-        <button class="btn-send" onclick="sendMail()"><i class="fa-solid fa-paper-plane"></i> Lancer la Campagne</button>
 
         <div class="card" style="margin-top:30px;">
              <h3><i class="fa-solid fa-clock-rotate-left" style="color:var(--primary);"></i> Derniers Envois</h3>
@@ -188,7 +215,7 @@
             <div id="step2" style="display:none;">
                 <div style="background:#fff7ed; border:2px solid #fdba74; padding:20px; border-radius:16px; margin-bottom:20px;">
                     <h3 style="margin:0; color:#c2410c;">Envoyez <span id="amountToPay"></span> FCFA</h3>
-                    <p style="margin:5px 0;">🟠 OM : 658980051 <br>🟡 MOMO : 653 76 33 03</p>
+                    <p style="margin:5px 0;">🟠 OM : 658 98 00 51 <br>🟡 MOMO : 653 76 33 93</p>
                     <p style="margin:0; font-size:0.8rem;">(Gabriel Ezekiel Junior Fokou)</p>
                 </div>
                 <input type="text" id="payRef" placeholder="ID Transaction ou Numéro..." style="padding:15px; border:2px solid #cbd5e1;">
@@ -231,63 +258,60 @@
         fileInput.addEventListener('change', function(e) { if(this.files[0]) { document.getElementById('fileName').innerText = this.files[0].name.substring(0,15); document.getElementById('fileChip').style.display = 'inline-flex'; } });
         function removeAttachment() { fileInput.value = ''; document.getElementById('fileChip').style.display = 'none'; }
         async function importFile(file) { if(!file) return; const fd = new FormData(); fd.append('file', file); try { const res = await fetch('/extract-file', { method:'POST', headers:{'Authorization':'Bearer '+token}, body:fd }); const data = await res.json(); emailList.value += (emailList.value?'\n':'') + data.contacts.join('\n'); updateCount(); localStorage.setItem('d_list', emailList.value); } catch(e){} }
-
-        // --- NEW FEATURES ---
-        // 1. DICTAPHONE
-        function startDictation() {
-            if (window.hasOwnProperty('webkitSpeechRecognition')) {
-                const mic = document.getElementById('micBtn');
-                const recognition = new webkitSpeechRecognition();
-                recognition.continuous = false; recognition.interimResults = false; recognition.lang = "fr-FR";
-                recognition.onstart = function() { mic.classList.add('mic-active'); document.getElementById('aiTopic').placeholder = "Parlez..."; };
-                recognition.onend = function() { mic.classList.remove('mic-active'); document.getElementById('aiTopic').placeholder = "Décrivez votre offre..."; };
-                recognition.onresult = function(e) { document.getElementById('aiTopic').value = e.results[0][0].transcript; };
-                recognition.start();
-            } else { alert("Option vocale non supportée sur ce navigateur (utilisez Chrome)"); }
-        }
-
-        // 2. AUTO-SAVE
-        setInterval(() => {
-            const draft = { sub: document.getElementById('subject').value, body: quill.root.innerHTML };
-            if(draft.sub || draft.body.length > 20) localStorage.setItem('mailDraft', JSON.stringify(draft));
-        }, 3000);
         
-        window.addEventListener('load', () => {
-            const s = localStorage.getItem('mailDraft');
-            if(s) { const d = JSON.parse(s); if(!document.getElementById('subject').value) document.getElementById('subject').value = d.sub; if(quill.root.innerHTML === '<p><br></p>') quill.root.innerHTML = d.body; }
-        });
+        // --- TOOLS ---
+        function cleanList() { const raw = emailList.value.split('\n'); const clean = [...new Set(raw.map(e => e.trim()).filter(e => e.includes('@')))]; emailList.value = clean.join('\n'); updateCount(); localStorage.setItem('d_list', emailList.value); alert(`Nettoyé : ${raw.length - clean.length} erreurs retirées.`); }
+        function generateQR() { const num = document.getElementById('qrNumber').value.replace(/\s+/g, ''); if(!num) return alert("Numéro?"); document.getElementById('qrResult').style.display = 'block'; document.getElementById('qrcode').innerHTML = ''; new QRCode(document.getElementById("qrcode"), { text: `https://wa.me/${num}?text=Bonjour,%20je%20veux%20m'inscrire`, width: 128, height: 128 }); }
+        
+        // --- DICTATION & SAVE ---
+        function startDictation() { if (window.hasOwnProperty('webkitSpeechRecognition')) { const mic = document.getElementById('micBtn'); const r = new webkitSpeechRecognition(); r.continuous = false; r.lang = "fr-FR"; r.onstart = function() { mic.classList.add('mic-active'); }; r.onend = function() { mic.classList.remove('mic-active'); }; r.onresult = function(e) { document.getElementById('aiTopic').value = e.results[0][0].transcript; }; r.start(); } else { alert("Utilisez Chrome"); } }
+        setInterval(() => { const draft = { sub: document.getElementById('subject').value, body: quill.root.innerHTML }; if(draft.sub || draft.body.length > 20) localStorage.setItem('mailDraft', JSON.stringify(draft)); }, 3000);
+        window.addEventListener('load', () => { const s = localStorage.getItem('mailDraft'); if(s) { const d = JSON.parse(s); if(!document.getElementById('subject').value) document.getElementById('subject').value = d.sub; if(quill.root.innerHTML === '<p><br></p>') quill.root.innerHTML = d.body; } });
 
-        // 3. WHATSAPP BTN
-        function insertWaBtn() {
-            const num = document.getElementById('waNumber').value.replace(/\s+/g, '');
-            if(!num) return alert("Entrez un numéro !");
-            const link = `https://wa.me/${num}?text=Bonjour,%20je%20suis%20intéressé%20par%20votre%20offre`;
-            const btnHtml = `<br><div style="text-align:center; margin: 20px 0;"><a href="${link}" style="background-color:#25D366; color:white; padding:12px 25px; text-decoration:none; border-radius:50px; font-weight:bold; font-size:16px; font-family:sans-serif; border:1px solid #25D366;">Commander sur WhatsApp 💬</a></div><br>`;
-            const range = quill.getSelection(true); quill.clipboard.dangerouslyPasteHTML(range ? range.index : quill.getLength(), btnHtml);
-        }
+        // --- WA BTN ---
+        function insertWaBtn() { const num = document.getElementById('waNumber').value.replace(/\s+/g, ''); if(!num) return alert("Numéro?"); const link = `https://wa.me/${num}?text=Bonjour,%20intéressé`; const html = `<br><div style="text-align:center; margin:20px 0;"><a href="${link}" style="background-color:#25D366; color:white; padding:12px 25px; text-decoration:none; border-radius:50px; font-weight:bold; font-size:16px;">Commander sur WhatsApp 💬</a></div><br>`; const r = quill.getSelection(true); quill.clipboard.dangerouslyPasteHTML(r ? r.index : quill.getLength(), html); }
 
         async function generateAI() { const t=document.getElementById('aiTopic').value; if(!t) return alert("Sujet?"); const b=document.getElementById('btnAi'); b.innerHTML="..."; try{ const res=await fetch('/generate-content',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({topic:t})}); const d=await res.json(); document.getElementById('subject').value=d.subject; quill.root.innerHTML=d.body; }catch(e){} b.innerHTML=`<i class="fa-solid fa-wand-magic-sparkles"></i>`; }
-        
         async function sendMail() {
             const list = emailList.value.split('\n').filter(l=>l.includes('@')).map(l=>{const p=l.split(','); return {email:p[0].trim(), name:p[1]||''}});
             if(!list.length) return alert("Contacts?");
             const btn = document.querySelector('.btn-send'); btn.innerHTML = "Envoi..."; btn.disabled = true;
             const fd = new FormData(); fd.append('recipients', JSON.stringify(list)); fd.append('subject', document.getElementById('subject').value); fd.append('message', quill.root.innerHTML);
             if(fileInput.files[0]) fd.append('attachment', fileInput.files[0]);
-            try { const res = await fetch('/send-mail', { method:'POST', headers:{'Authorization':'Bearer '+token}, body:fd }); const d = await res.json(); if(d.success) { alert(`Envoyés: ${d.count}`); localStorage.setItem('credits', d.newCredits); document.getElementById('creditsDisplay').innerText = d.newCredits; loadHistory(); localStorage.removeItem('mailDraft'); } else { alert(d.error); } } catch(e){}
-            btn.innerHTML = "Lancer la Campagne"; btn.disabled = false;
+            try { const res = await fetch('/send-mail', { method:'POST', headers:{'Authorization':'Bearer '+token}, body:fd }); const d = await res.json(); if(d.success) { alert(`Succès: ${d.count}`); localStorage.setItem('credits', d.newCredits); document.getElementById('creditsDisplay').innerText = d.newCredits; loadHistory(); localStorage.removeItem('mailDraft'); } else { alert(d.error); } } catch(e){}
+            btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Lancer la Campagne`; btn.disabled = false;
         }
-
         async function loadHistory() { try{ const r=await fetch('/api/history',{headers:{'Authorization':'Bearer '+token}}); const d=await r.json(); document.getElementById('historyContainer').innerHTML = d.campaigns.map(c=>`<li class="history-item"><div><b>${c.subject.substring(0,20)}</b><br><small>${new Date(c.sentAt).toLocaleDateString()}</small></div> <span class="badge">${c.recipientCount} env.</span></li>`).join(''); }catch(e){} }
-        
         let currentPack=''; function openPayment(){document.getElementById('paymentModal').style.display='flex';resetPay();} function selectPack(p,c){currentPack=p;document.getElementById('step1').style.display='none';document.getElementById('step2').style.display='block';document.getElementById('amountToPay').innerText=c.toLocaleString();} function resetPay(){document.getElementById('step1').style.display='block';document.getElementById('step2').style.display='none';}
         async function sendPaymentRequest(){ const r=document.getElementById('payRef').value; if(!r) return alert("Ref?"); try{ await fetch('/api/payment/declare',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({pack:currentPack,ref:r})}); alert("Envoyé!"); document.getElementById('paymentModal').style.display='none'; }catch(e){} }
-
+        
+        // --- CHATBOT ANIMATION ---
         function toggleChat(){const w=document.getElementById('chatWindow'); w.style.display=w.style.display==='flex'?'none':'flex';}
-        async function sendChat(){const i=document.getElementById('chatInput'); const t=i.value; if(!t)return; const b=document.getElementById('chatBody'); b.innerHTML+=`<div style="text-align:right;margin:5px;"><b>${t}</b></div>`; i.value=''; const r=await fetch('/api/assist',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({question:t})}); const d=await r.json(); b.innerHTML+=`<div style="margin:5px;">${d.reply}</div>`;}
+        async function sendChat(){
+            const i=document.getElementById('chatInput'); const t=i.value; if(!t)return; 
+            const b=document.getElementById('chatBody'); 
+            // User MSG
+            b.innerHTML+=`<div style="text-align:right;margin:5px;"><b>${t}</b></div>`; i.value=''; 
+            
+            // ANIMATION BULLE
+            const typingId = 'typing-' + Date.now();
+            b.innerHTML += `<div id="${typingId}" class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+            b.scrollTop = b.scrollHeight;
+
+            try {
+                const r=await fetch('/api/assist',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({question:t})}); 
+                const d=await r.json(); 
+                document.getElementById(typingId).remove(); // Remove animation
+                b.innerHTML+=`<div style="margin:5px;">${d.reply}</div>`;
+            } catch(e) {
+                document.getElementById(typingId).remove();
+            }
+            b.scrollTop = b.scrollHeight;
+        }
+
+        // GLOBALS
         function openFeedback(){document.getElementById('feedbackModal').style.display='flex';} async function sendFeedback(){await fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({type:document.getElementById('feedType').value,message:document.getElementById('feedMsg').value})}); alert("Merci"); document.getElementById('feedbackModal').style.display='none';}
         function openConfig(){document.getElementById('configModal').style.display='flex';} async function saveConfig(){await fetch('/api/settings/smtp',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({smtpUser:document.getElementById('smtpUser').value,smtpPass:document.getElementById('smtpPass').value})}); alert("OK"); document.getElementById('configModal').style.display='none';}
-        function logout(){localStorage.clear(); window.location.href='/login';}
     </script>
 </body>
 </html>

@@ -177,7 +177,7 @@ app.post('/api/payment/declare', authenticateToken, async (req, res) => {
     } catch (e) { res.status(500).json({ error: "Erreur" }); }
 });
 
-// 4. AUTHENTIFICATION (50 CRÉDITS OFFERTS)
+// 4. AUTHENTIFICATION (AUTO LOGIN + 50 CRÉDITS)
 app.post('/auth/register', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -191,7 +191,12 @@ app.post('/auth/register', async (req, res) => {
         });
         
         await user.save();
-        res.json({ success: true });
+
+        // GÉNÉRATION IMMEDIATE DU TOKEN (Pour connexion directe)
+        const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '24h' });
+
+        // On renvoie le token et les infos
+        res.json({ success: true, token, credits: 50, opens: 0 });
     } catch (e) { res.status(500).json({ error: "Erreur" }); }
 });
 
