@@ -30,7 +30,7 @@
         .stat-card p { margin: 10px 0 0 0; font-size: 1.8rem; font-weight: 800; color: var(--text-main); }
         .btn-recharge { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 50px; font-size: 0.8rem; cursor: pointer; margin-top: 15px; font-weight: 700; width: 100%; transition: 0.2s; box-shadow: 0 4px 10px rgba(99,102,241,0.3); }
 
-        /* MAIN GRID */
+        /* GRID */
         .main-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 25px; margin-bottom: 25px; }
         .card { background: white; border-radius: var(--radius); padding: 25px; border: 1px solid var(--border); transition: all 0.3s ease; }
         .card h3 { margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; color: var(--text-main); font-weight: 700; }
@@ -67,11 +67,11 @@
         .mic-active { color: red !important; animation: beat 1s infinite; }
         @keyframes beat { 0% { transform: translateY(-50%) scale(1); } 50% { transform: translateY(-50%) scale(1.2); } 100% { transform: translateY(-50%) scale(1); } }
 
-        /* --- MODALS (AMELIOREES) --- */
+        /* --- MODALS (PRICING & PAY) --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px; }
         .modal-box { background: white; padding: 30px; border-radius: 24px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; }
         
-        /* PRICING STYLES */
+        /* Pricing */
         .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
         .plan-card { border: 2px solid var(--border); border-radius: 16px; padding: 15px; cursor: pointer; text-align: center; transition: 0.2s; background: #fff; display: flex; flex-direction: column; justify-content: space-between; }
         .plan-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(99,102,241,0.1); }
@@ -81,7 +81,7 @@
         .plan-features li { margin-bottom: 5px; display: flex; gap: 5px; align-items: center; }
         .plan-features li i { color: var(--success); }
 
-        /* STEP STYLES */
+        /* Payment Steps */
         .pay-step { background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
         .pay-step h4 { margin: 0 0 10px 0; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; }
         .step-num { background: var(--text-main); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
@@ -107,11 +107,6 @@
     </style>
 </head>
 <body>
-    <script>
-        const token = localStorage.getItem('token');
-        if (!token) window.location.href = '/login';
-    </script>
-
     <div class="wrapper">
         <div class="header">
             <div class="brand"><h1><i class="fa-solid fa-paper-plane"></i> Newsletter SaaS</h1></div>
@@ -251,7 +246,7 @@
                 <div class="pay-step" style="background:#dcfce7; border-color:#86efac;">
                     <h4 style="color:#166534;"><span class="step-num" style="background:#166534;">3</span> Activation Immédiate</h4>
                     <p style="margin:5px 0 10px 0; font-size:0.9rem; color:#14532d;">
-                        Pour activer votre compte rapidement, envoyez <b>la capture d'écran</b> + <b>votre email</b> sur WhatsApp.
+                        Envoyez <b>la capture d'écran</b> (ou le numéro de transaction) ET <b>votre email</b> sur WhatsApp pour activation.
                     </p>
                     <a href="https://wa.me/237658980051" target="_blank" style="background:#25D366; color:white; text-decoration:none; padding:10px; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px; font-weight:bold;">
                         <i class="fa-brands fa-whatsapp"></i> Envoyer la preuve
@@ -278,6 +273,7 @@
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
+        // --- 1. VARIABLES & INIT ---
         const token = localStorage.getItem('token');
         if (!token) window.location.href = '/login';
 
@@ -292,9 +288,11 @@
         if(localStorage.getItem('d_list')) { emailList.value = localStorage.getItem('d_list'); updateCount(); }
         loadHistory();
 
+        // --- 2. LISTENERS ---
         emailList.addEventListener('input', (e) => { localStorage.setItem('d_list', e.target.value); updateCount(); });
         fileInput.addEventListener('change', function(e) { if(this.files[0]) { document.getElementById('fileName').innerText = this.files[0].name.substring(0,15); document.getElementById('fileChip').style.display = 'inline-flex'; } });
         
+        // --- 3. FONCTIONS ---
         function logout() { if(confirm("Voulez-vous vraiment vous déconnecter ?")) { localStorage.clear(); window.location.href = '/login'; } }
         function updateCount() { const c = emailList.value.split('\n').filter(l=>l.includes('@')).length; document.getElementById('count').innerText = c + " contacts"; document.getElementById('countDisplay').innerText = c; }
         function removeAttachment() { fileInput.value = ''; document.getElementById('fileChip').style.display = 'none'; }
@@ -334,7 +332,7 @@
         function selectPack(p,c){currentPack=p;document.getElementById('step1').style.display='none';document.getElementById('step2').style.display='block';document.getElementById('amountToPay').innerText=c.toLocaleString();} 
         function resetPay(){document.getElementById('step1').style.display='block';document.getElementById('step2').style.display='none';}
         
-        async function sendPaymentRequest(){ const r=document.getElementById('payRef').value; if(!r) return alert("Entrez la référence de la transaction."); try{ await fetch('/api/payment/declare',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({pack:currentPack,ref:r})}); alert("Demande envoyée ! Passez à l'étape 3."); }catch(e){ alert("Erreur connexion"); } }
+        async function sendPaymentRequest(){ const r=document.getElementById('payRef').value; if(!r) return alert("Entrez la référence."); try{ await fetch('/api/payment/declare',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({pack:currentPack,ref:r})}); alert("Demande envoyée !"); }catch(e){ alert("Erreur"); } }
         
         function toggleChat(){const w=document.getElementById('chatWindow'); w.style.display=w.style.display==='flex'?'none':'flex';}
         async function sendChat(){
