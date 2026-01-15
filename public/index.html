@@ -15,7 +15,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 20px; min-height: 100vh; padding-bottom: 100px; }
         .wrapper { max-width: 1200px; margin: 0 auto; }
         
-        /* HEADER AVEC Z-INDEX FIX */
+        /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px; position: relative; z-index: 100; }
         .brand h1 { font-size: 1.4rem; font-weight: 800; margin: 0; color: var(--primary); letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
         .header-actions { display: flex; gap: 10px; }
@@ -25,20 +25,19 @@
         /* STATS */
         .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; position: relative; z-index: 1; }
         .stat-card { background: white; padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); position: relative; overflow: hidden; transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--primary); }
         .stat-card h3 { margin: 0; font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
         .stat-card p { margin: 10px 0 0 0; font-size: 1.8rem; font-weight: 800; color: var(--text-main); }
         .btn-recharge { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 50px; font-size: 0.8rem; cursor: pointer; margin-top: 15px; font-weight: 700; width: 100%; transition: 0.2s; box-shadow: 0 4px 10px rgba(99,102,241,0.3); }
 
-        /* GRID */
+        /* MAIN GRID */
         .main-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 25px; margin-bottom: 25px; }
         .card { background: white; border-radius: var(--radius); padding: 25px; border: 1px solid var(--border); transition: all 0.3s ease; }
         .card h3 { margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; color: var(--text-main); font-weight: 700; }
         
-        /* INPUTS */
+        /* INPUTS & TOOLS */
         input, textarea, select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; background: #f8fafc; font-size: 0.95rem; font-family: inherit; margin-top: 8px; outline: none; transition: 0.2s; }
         input:focus, textarea:focus { border-color: var(--primary); background: white; }
-        
-        /* UPLOAD & TOOLS */
         .upload-box { border: 2px dashed #cbd5e1; padding: 30px; text-align: center; border-radius: 16px; cursor: pointer; margin-bottom: 15px; background: #f8fafc; color: #64748b; font-weight: 600; transition: all 0.2s; }
         .upload-box:hover { border-color: var(--primary); background: #eef2ff; color: var(--primary); }
         .tools-row { display: flex; gap: 10px; margin-top: 10px; }
@@ -47,7 +46,7 @@
         #qrResult { margin-top: 15px; display: none; text-align: center; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px dashed #cbd5e1; }
         #qrcode { display: inline-block; margin: 10px 0; }
 
-        /* EDITOR & ATTACHMENTS */
+        /* EDITOR AREAS */
         .attachment-area { display:flex; align-items:center; gap:10px; margin-top:15px; background:#f1f5f9; padding:10px 15px; border-radius:12px; border: 1px solid var(--border); }
         .file-chip { display:none; align-items:center; gap:10px; background:white; padding:5px 10px; border-radius:50px; font-size:0.85rem; border:1px solid var(--primary); color:var(--primary); font-weight:600; }
         .wa-tool { background: #dcfce7; border: 1px solid #86efac; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
@@ -68,11 +67,24 @@
         .mic-active { color: red !important; animation: beat 1s infinite; }
         @keyframes beat { 0% { transform: translateY(-50%) scale(1); } 50% { transform: translateY(-50%) scale(1.2); } 100% { transform: translateY(-50%) scale(1); } }
 
-        /* MODALS */
+        /* --- MODALS (AMELIOREES) --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px; }
-        .modal-box { background: white; padding: 30px; border-radius: 24px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
-        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
-        .plan-card { border: 2px solid var(--border); border-radius: 16px; padding: 15px; cursor: pointer; text-align: left; }
+        .modal-box { background: white; padding: 30px; border-radius: 24px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; }
+        
+        /* PRICING STYLES */
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .plan-card { border: 2px solid var(--border); border-radius: 16px; padding: 15px; cursor: pointer; text-align: center; transition: 0.2s; background: #fff; display: flex; flex-direction: column; justify-content: space-between; }
+        .plan-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(99,102,241,0.1); }
+        .plan-title { font-weight: 800; font-size: 1rem; color: #64748b; margin-bottom: 5px; display: block; }
+        .plan-price { font-weight: 900; font-size: 1.1rem; color: var(--text-main); display: block; margin-bottom: 10px; }
+        .plan-features { list-style: none; padding: 0; margin: 0; text-align: left; font-size: 0.75rem; color: #475569; }
+        .plan-features li { margin-bottom: 5px; display: flex; gap: 5px; align-items: center; }
+        .plan-features li i { color: var(--success); }
+
+        /* STEP STYLES */
+        .pay-step { background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
+        .pay-step h4 { margin: 0 0 10px 0; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; }
+        .step-num { background: var(--text-main); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
         
         /* CHATBOT */
         .chat-btn { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; z-index: 5000; }
@@ -95,6 +107,11 @@
     </style>
 </head>
 <body>
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/login';
+    </script>
+
     <div class="wrapper">
         <div class="header">
             <div class="brand"><h1><i class="fa-solid fa-paper-plane"></i> Newsletter SaaS</h1></div>
@@ -124,28 +141,22 @@
                         <input type="file" id="fileInput" accept=".csv,.xlsx" style="display:none;" onchange="importFile(this.files[0])">
                     </div>
                     <textarea id="emailList" style="height: 180px; font-family:monospace;" placeholder="Ex: client1@mail.com"></textarea>
-                    
                     <div class="tools-row">
                         <button class="tool-btn" onclick="cleanList()"><i class="fa-solid fa-broom"></i> Nettoyer</button>
                         <div style="font-size:0.9rem; color:#64748b; font-weight:600; padding:10px;" id="count">0 contacts</div>
                     </div>
                 </div>
-
                 <div class="card">
                     <h3><i class="fa-solid fa-toolbox" style="color:#f59e0b;"></i> Outils Boutique</h3>
                     <p style="font-size:0.85rem; color:#64748b; margin-top:5px;">QR Code pour inscription WhatsApp.</p>
                     <input type="text" id="qrNumber" placeholder="Numéro WhatsApp (ex: 237...)" style="margin-top:10px;">
                     <button class="btn-recharge" onclick="generateQR()" style="margin-top:10px; background:#0f172a; border-radius:10px;">Générer QR Code</button>
-                    <div id="qrResult">
-                        <div id="qrcode"></div>
-                        <p style="font-size:0.8rem; font-weight:bold; margin-top:10px;">À imprimer !</p>
-                    </div>
+                    <div id="qrResult"><div id="qrcode"></div><p style="font-size:0.8rem; font-weight:bold; margin-top:10px;">À imprimer !</p></div>
                 </div>
             </div>
 
             <div class="card">
                 <h3><i class="fa-solid fa-pen-nib" style="color:var(--primary)"></i> Contenu du Mail</h3>
-                
                 <div class="ai-group">
                     <div style="position:relative; width:100%;">
                         <input type="text" id="aiTopic" placeholder="Décrivez votre offre (ex: Promo Ramadan -30%)" style="margin:0; padding-right:40px; height: 50px;">
@@ -153,7 +164,6 @@
                     </div>
                     <button onclick="generateAI()" id="btnAi"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
                 </div>
-
                 <div class="wa-tool">
                     <div style="font-size:0.85rem; color:#166534; font-weight:700;"><i class="fa-brands fa-whatsapp"></i> Bouton WhatsApp</div>
                     <div class="wa-row">
@@ -161,10 +171,8 @@
                         <button class="btn-add-wa" onclick="insertWaBtn()">Ajouter</button>
                     </div>
                 </div>
-
                 <input type="text" id="subject" placeholder="Objet du mail...">
                 <div id="editor-container"></div>
-                
                 <div class="attachment-area">
                     <label style="cursor:pointer; display:flex; align-items:center; gap:10px; font-weight:600; color:#475569;">
                         <i class="fa-solid fa-paperclip"></i> Joindre un fichier
@@ -172,7 +180,6 @@
                     </label>
                     <div id="fileChip" class="file-chip"><span id="fileName">...</span> <i class="fa-solid fa-xmark remove-file" onclick="removeAttachment()"></i></div>
                 </div>
-
                 <button class="btn-send" onclick="sendMail()" style="margin-top:20px;"><i class="fa-solid fa-paper-plane"></i> Lancer la Campagne</button>
             </div>
         </div>
@@ -185,27 +192,73 @@
 
     <div id="paymentModal" class="modal-overlay">
         <div class="modal-box">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="margin:0;">Recharger</h2>
-                <i class="fa-solid fa-xmark" style="font-size:1.5rem; cursor:pointer;" onclick="document.getElementById('paymentModal').style.display='none'"></i>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2 style="margin:0;">Choisir un Pack</h2>
+                <i class="fa-solid fa-xmark" style="font-size:1.5rem; cursor:pointer; color:#94a3b8;" onclick="document.getElementById('paymentModal').style.display='none'"></i>
             </div>
+            
             <div id="step1">
                 <div class="pricing-grid">
-                    <div class="plan-card" onclick="selectPack('starter', 3000)"><b>STARTER</b><br>500 Credits<br><span style="font-weight:900;">3 000 FCFA</span></div>
-                    <div class="plan-card" style="border-color:var(--primary); background:#f5f3ff;" onclick="selectPack('pro', 10000)"><b>PRO</b><br>2 000 Credits<br><span style="font-weight:900; color:var(--primary);">10 000 FCFA</span></div>
-                    <div class="plan-card" onclick="selectPack('business', 20000)"><b>BUSINESS</b><br>5 000 Credits<br><span style="font-weight:900;">20 000 FCFA</span></div>
+                    <div class="plan-card" onclick="selectPack('starter', 3000)">
+                        <span class="plan-title">STARTER</span>
+                        <span class="plan-price">3 000 FCFA</span>
+                        <ul class="plan-features">
+                            <li><i class="fa-solid fa-check"></i> <b>500</b> Crédits</li>
+                            <li><i class="fa-solid fa-check"></i> Accès Dashboard</li>
+                            <li><i class="fa-solid fa-check"></i> Support Standard</li>
+                        </ul>
+                    </div>
+                    <div class="plan-card" style="border-color:var(--primary); background:#f5f3ff;" onclick="selectPack('pro', 10000)">
+                        <div style="position:absolute; top:0; right:0; background:var(--primary); color:white; font-size:0.6rem; padding:2px 8px; border-bottom-left-radius:8px;">POPULAIRE</div>
+                        <span class="plan-title" style="color:var(--primary);">PRO</span>
+                        <span class="plan-price" style="color:var(--primary);">10 000 FCFA</span>
+                        <ul class="plan-features">
+                            <li><i class="fa-solid fa-check"></i> <b>2 000</b> Crédits</li>
+                            <li><i class="fa-solid fa-check"></i> IA Rédaction</li>
+                            <li><i class="fa-solid fa-check"></i> <b>Logo Perso</b></li>
+                        </ul>
+                    </div>
+                    <div class="plan-card" onclick="selectPack('business', 20000)">
+                        <span class="plan-title">BUSINESS</span>
+                        <span class="plan-price">20 000 FCFA</span>
+                        <ul class="plan-features">
+                            <li><i class="fa-solid fa-check"></i> <b>5 000</b> Crédits</li>
+                            <li><i class="fa-solid fa-check"></i> Campagnes Illimitées</li>
+                            <li><i class="fa-solid fa-check"></i> <b>Support VIP</b></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
+
             <div id="step2" style="display:none;">
-                <div style="background:#fff7ed; border:2px solid #fdba74; padding:20px; border-radius:16px; margin-bottom:20px;">
-                    <h3 style="margin:0; color:#c2410c;">Envoyez <span id="amountToPay"></span> FCFA</h3>
-                    <p style="margin:5px 0;">🟠 OM : 658 98 00 51 <br>🟡 MOMO : 653 33 76 93</p>
-                    <p style="margin:0; font-size:0.8rem;">(Gabriel Ezekiel Junior Fokou)</p>
+                <h3 style="color:var(--primary); margin-bottom:20px;">Instructions de Paiement</h3>
+                
+                <div class="pay-step">
+                    <h4><span class="step-num">1</span> Transférez l'argent</h4>
+                    <p style="margin:5px 0;">Envoyez <b id="amountToPay" style="font-size:1.1rem;"></b> FCFA au numéro :</p>
+                    <p style="margin:5px 0; font-weight:700;">🟠 Orange Money : 658 98 00 51</p>
+                    <p style="margin:5px 0; font-weight:700;">🟡 MTN MoMo : 653 76 33 93</p>
+                    <small style="color:#64748b;">Nom : Gabriel Ezekiel Junior Fokou</small>
                 </div>
-                <input type="text" id="payRef" placeholder="ID Transaction ou Numéro..." style="padding:15px; border:2px solid #cbd5e1;">
-                <button onclick="sendPaymentRequest()" class="btn-send" style="margin-top:10px;">Valider</button>
-                <a href="https://wa.me/237658980051" target="_blank" style="display:block; text-align:center; margin-top:15px; color:#25D366; font-weight:bold; text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> Aide WhatsApp</a>
-                <div style="text-align:center; margin-top:10px; text-decoration:underline; cursor:pointer;" onclick="resetPay()">Retour</div>
+
+                <div class="pay-step">
+                    <h4><span class="step-num">2</span> Validation Technique</h4>
+                    <p style="margin:5px 0 10px 0; font-size:0.9rem;">Entrez l'ID de transaction reçu par SMS :</p>
+                    <input type="text" id="payRef" placeholder="Ex: PP230112..." style="border:1px solid #cbd5e1; margin-bottom:10px;">
+                    <button onclick="sendPaymentRequest()" class="btn-recharge" style="width:100%;">Valider ma demande</button>
+                </div>
+
+                <div class="pay-step" style="background:#dcfce7; border-color:#86efac;">
+                    <h4 style="color:#166534;"><span class="step-num" style="background:#166534;">3</span> Activation Immédiate</h4>
+                    <p style="margin:5px 0 10px 0; font-size:0.9rem; color:#14532d;">
+                        Pour activer votre compte rapidement, envoyez <b>la capture d'écran</b> + <b>votre email</b> sur WhatsApp.
+                    </p>
+                    <a href="https://wa.me/237658980051" target="_blank" style="background:#25D366; color:white; text-decoration:none; padding:10px; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px; font-weight:bold;">
+                        <i class="fa-brands fa-whatsapp"></i> Envoyer la preuve
+                    </a>
+                </div>
+
+                <div style="text-align:center; margin-top:10px; text-decoration:underline; cursor:pointer; color:#64748b;" onclick="resetPay()">← Changer de pack</div>
             </div>
         </div>
     </div>
@@ -225,39 +278,25 @@
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
-        // --- SCRIPT UNIQUE ET CENTRALISÉ ---
-        // On récupère le token au démarrage
         const token = localStorage.getItem('token');
         if (!token) window.location.href = '/login';
 
-        // Variables Globales
         const emailList = document.getElementById('emailList');
         const fileInput = document.getElementById('mailAttachment');
         var quill = new Quill('#editor-container', { theme: 'snow', modules: { toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'bullet' }], ['link']] } });
         let currentPack=''; 
 
-        // Initialisation
         if(localStorage.getItem('isAdmin')==='true') document.getElementById('adminBtn').style.display='flex';
         document.getElementById('creditsDisplay').innerText = localStorage.getItem('credits') || "--";
         document.getElementById('opensDisplay').innerText = localStorage.getItem('opens') || "0";
         if(localStorage.getItem('d_list')) { emailList.value = localStorage.getItem('d_list'); updateCount(); }
         loadHistory();
 
-        // Événements
         emailList.addEventListener('input', (e) => { localStorage.setItem('d_list', e.target.value); updateCount(); });
         fileInput.addEventListener('change', function(e) { if(this.files[0]) { document.getElementById('fileName').innerText = this.files[0].name.substring(0,15); document.getElementById('fileChip').style.display = 'inline-flex'; } });
         
-        // --- FONCTIONS ---
-        
-        function logout() { 
-            if(confirm("Voulez-vous vraiment vous déconnecter ?")) {
-                localStorage.clear(); 
-                window.location.href = '/login'; 
-            }
-        }
-
+        function logout() { if(confirm("Voulez-vous vraiment vous déconnecter ?")) { localStorage.clear(); window.location.href = '/login'; } }
         function updateCount() { const c = emailList.value.split('\n').filter(l=>l.includes('@')).length; document.getElementById('count').innerText = c + " contacts"; document.getElementById('countDisplay').innerText = c; }
-        
         function removeAttachment() { fileInput.value = ''; document.getElementById('fileChip').style.display = 'none'; }
         
         async function importFile(file) { 
@@ -273,11 +312,8 @@
         }
 
         function cleanList() { const raw = emailList.value.split('\n'); const clean = [...new Set(raw.map(e => e.trim()).filter(e => e.includes('@')))]; emailList.value = clean.join('\n'); updateCount(); localStorage.setItem('d_list', emailList.value); alert(`Nettoyé : ${raw.length - clean.length} erreurs retirées.`); }
-        
         function generateQR() { const num = document.getElementById('qrNumber').value.replace(/\s+/g, ''); if(!num) return alert("Numéro?"); document.getElementById('qrResult').style.display = 'block'; document.getElementById('qrcode').innerHTML = ''; new QRCode(document.getElementById("qrcode"), { text: `https://wa.me/${num}?text=Bonjour,%20je%20veux%20m'inscrire`, width: 128, height: 128 }); }
-        
         function startDictation() { if (window.hasOwnProperty('webkitSpeechRecognition')) { const mic = document.getElementById('micBtn'); const r = new webkitSpeechRecognition(); r.continuous = false; r.lang = "fr-FR"; r.onstart = function() { mic.classList.add('mic-active'); }; r.onend = function() { mic.classList.remove('mic-active'); }; r.onresult = function(e) { document.getElementById('aiTopic').value = e.results[0][0].transcript; }; r.start(); } else { alert("Utilisez Chrome"); } }
-        
         function insertWaBtn() { const num = document.getElementById('waNumber').value.replace(/\s+/g, ''); if(!num) return alert("Numéro?"); const link = `https://wa.me/${num}?text=Bonjour,%20intéressé`; const html = `<br><div style="text-align:center; margin:20px 0;"><a href="${link}" style="background-color:#25D366; color:white; padding:12px 25px; text-decoration:none; border-radius:50px; font-weight:bold; font-size:16px;">Commander sur WhatsApp 💬</a></div><br>`; const r = quill.getSelection(true); quill.clipboard.dangerouslyPasteHTML(r ? r.index : quill.getLength(), html); }
 
         async function generateAI() { const t=document.getElementById('aiTopic').value; if(!t) return alert("Sujet?"); const b=document.getElementById('btnAi'); b.innerHTML="..."; try{ const res=await fetch('/generate-content',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({topic:t})}); const d=await res.json(); document.getElementById('subject').value=d.subject; quill.root.innerHTML=d.body; }catch(e){} b.innerHTML=`<i class="fa-solid fa-wand-magic-sparkles"></i>`; }
@@ -298,26 +334,13 @@
         function selectPack(p,c){currentPack=p;document.getElementById('step1').style.display='none';document.getElementById('step2').style.display='block';document.getElementById('amountToPay').innerText=c.toLocaleString();} 
         function resetPay(){document.getElementById('step1').style.display='block';document.getElementById('step2').style.display='none';}
         
-        async function sendPaymentRequest(){ const r=document.getElementById('payRef').value; if(!r) return alert("Ref?"); try{ await fetch('/api/payment/declare',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({pack:currentPack,ref:r})}); alert("Envoyé!"); document.getElementById('paymentModal').style.display='none'; }catch(e){} }
+        async function sendPaymentRequest(){ const r=document.getElementById('payRef').value; if(!r) return alert("Entrez la référence de la transaction."); try{ await fetch('/api/payment/declare',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({pack:currentPack,ref:r})}); alert("Demande envoyée ! Passez à l'étape 3."); }catch(e){ alert("Erreur connexion"); } }
         
         function toggleChat(){const w=document.getElementById('chatWindow'); w.style.display=w.style.display==='flex'?'none':'flex';}
-        
         async function sendChat(){
-            const i=document.getElementById('chatInput'); const t=i.value; if(!t)return; 
-            const b=document.getElementById('chatBody'); 
-            b.innerHTML+=`<div style="text-align:right;margin:5px;"><b>${t}</b></div>`; i.value=''; 
-            
-            const typingId = 'typing-' + Date.now();
-            b.innerHTML += `<div id="${typingId}" class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
-            b.scrollTop = b.scrollHeight;
-
-            try {
-                const r=await fetch('/api/assist',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({question:t})}); 
-                const d=await r.json(); 
-                document.getElementById(typingId).remove(); 
-                b.innerHTML+=`<div style="margin:5px;">${d.reply}</div>`;
-            } catch(e) { document.getElementById(typingId).remove(); }
-            b.scrollTop = b.scrollHeight;
+            const i=document.getElementById('chatInput'); const t=i.value; if(!t)return; const b=document.getElementById('chatBody'); b.innerHTML+=`<div style="text-align:right;margin:5px;"><b>${t}</b></div>`; i.value=''; 
+            const typingId = 'typing-' + Date.now(); b.innerHTML += `<div id="${typingId}" class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`; b.scrollTop = b.scrollHeight;
+            try { const r=await fetch('/api/assist',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({question:t})}); const d=await r.json(); document.getElementById(typingId).remove(); b.innerHTML+=`<div style="margin:5px;">${d.reply}</div>`; } catch(e) { document.getElementById(typingId).remove(); } b.scrollTop = b.scrollHeight;
         }
 
         function openFeedback(){document.getElementById('feedbackModal').style.display='flex';} 
@@ -325,7 +348,6 @@
         function openConfig(){document.getElementById('configModal').style.display='flex';} 
         async function saveConfig(){await fetch('/api/settings/smtp',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({smtpUser:document.getElementById('smtpUser').value,smtpPass:document.getElementById('smtpPass').value})}); alert("OK"); document.getElementById('configModal').style.display='none';}
 
-        // Auto Save Interval
         setInterval(() => { const draft = { sub: document.getElementById('subject').value, body: quill.root.innerHTML }; if(draft.sub || draft.body.length > 20) localStorage.setItem('mailDraft', JSON.stringify(draft)); }, 3000);
         window.addEventListener('load', () => { const s = localStorage.getItem('mailDraft'); if(s) { const d = JSON.parse(s); if(!document.getElementById('subject').value) document.getElementById('subject').value = d.sub; if(quill.root.innerHTML === '<p><br></p>') quill.root.innerHTML = d.body; } });
     </script>
