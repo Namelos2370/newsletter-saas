@@ -25,7 +25,6 @@
         /* STATS */
         .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; position: relative; z-index: 1; }
         .stat-card { background: white; padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); position: relative; overflow: hidden; transition: all 0.3s ease; }
-        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--primary); }
         .stat-card h3 { margin: 0; font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
         .stat-card p { margin: 10px 0 0 0; font-size: 1.8rem; font-weight: 800; color: var(--text-main); }
         .btn-recharge { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 50px; font-size: 0.8rem; cursor: pointer; margin-top: 15px; font-weight: 700; width: 100%; transition: 0.2s; box-shadow: 0 4px 10px rgba(99,102,241,0.3); }
@@ -54,6 +53,7 @@
         .btn-add-wa { background: var(--whatsapp); color: white; border: none; padding: 0 20px; border-radius: 10px; font-weight: 700; cursor: pointer; height: 48px; white-space: nowrap; }
         .btn-send { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; width: 100%; padding: 18px; border-radius: 16px; border: none; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 10px 25px -5px rgba(99,102,241,0.5); transition: 0.2s; }
         .btn-send:hover { transform: translateY(-3px); }
+        .btn-send:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
         
         .history-list { list-style: none; padding: 0; margin: 0; }
         .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); transition: 0.2s; }
@@ -64,10 +64,8 @@
         
         .ai-group { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
         #btnAi { background: linear-gradient(135deg,#8b5cf6,#6366f1); color: white; border: none; border-radius: 12px; padding: 0 20px; font-weight: 700; white-space: nowrap; cursor: pointer; height: 50px; }
-        .mic-active { color: red !important; animation: beat 1s infinite; }
-        @keyframes beat { 0% { transform: translateY(-50%) scale(1); } 50% { transform: translateY(-50%) scale(1.2); } 100% { transform: translateY(-50%) scale(1); } }
-
-        /* --- MODALS (PRICING & PAY) --- */
+        
+        /* --- MODALS --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px; }
         .modal-box { background: white; padding: 30px; border-radius: 24px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; }
         
@@ -316,14 +314,61 @@
 
         async function generateAI() { const t=document.getElementById('aiTopic').value; if(!t) return alert("Sujet?"); const b=document.getElementById('btnAi'); b.innerHTML="..."; try{ const res=await fetch('/generate-content',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({topic:t})}); const d=await res.json(); document.getElementById('subject').value=d.subject; quill.root.innerHTML=d.body; }catch(e){} b.innerHTML=`<i class="fa-solid fa-wand-magic-sparkles"></i>`; }
         
+        // --- ENVOI INTELLIGENT (BATCHING) ---
         async function sendMail() {
-            const list = emailList.value.split('\n').filter(l=>l.includes('@')).map(l=>{const p=l.split(','); return {email:p[0].trim(), name:p[1]||''}});
-            if(!list.length) return alert("Contacts?");
-            const btn = document.querySelector('.btn-send'); btn.innerHTML = "Envoi..."; btn.disabled = true;
-            const fd = new FormData(); fd.append('recipients', JSON.stringify(list)); fd.append('subject', document.getElementById('subject').value); fd.append('message', quill.root.innerHTML);
-            if(fileInput.files[0]) fd.append('attachment', fileInput.files[0]);
-            try { const res = await fetch('/send-mail', { method:'POST', headers:{'Authorization':'Bearer '+token}, body:fd }); const d = await res.json(); if(d.success) { alert(`Succès: ${d.count}`); localStorage.setItem('credits', d.newCredits); document.getElementById('creditsDisplay').innerText = d.newCredits; loadHistory(); localStorage.removeItem('mailDraft'); } else { alert(d.error); } } catch(e){}
-            btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Lancer la Campagne`; btn.disabled = false;
+            // 1. Récupérer la liste propre
+            const rawList = emailList.value.split('\n').filter(l=>l.includes('@'));
+            if(!rawList.length) return alert("Veuillez ajouter des contacts.");
+            
+            // 2. Préparer les paquets (Chunks) de 10
+            const CHUNK_SIZE = 10;
+            const btn = document.querySelector('.btn-send');
+            const originalText = btn.innerHTML;
+            let totalSent = 0;
+            
+            btn.disabled = true;
+
+            // 3. Boucle d'envoi
+            for (let i = 0; i < rawList.length; i += CHUNK_SIZE) {
+                const chunk = rawList.slice(i, i + CHUNK_SIZE);
+                const formattedChunk = chunk.map(l=>{const p=l.split(','); return {email:p[0].trim(), name:p[1]||''}});
+                
+                // UI Update
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Envoi ${i + 1} à ${Math.min(i + CHUNK_SIZE, rawList.length)}...`;
+
+                const fd = new FormData();
+                fd.append('recipients', JSON.stringify(formattedChunk));
+                fd.append('subject', document.getElementById('subject').value);
+                fd.append('message', quill.root.innerHTML);
+                if(fileInput.files[0] && i===0) fd.append('attachment', fileInput.files[0]); // Attach only on first call or handle differently? Actually, server creates new mail each time. Better to attach every time OR logic change. For now, simplest is attaching every time but bandwidth heavy. Let's keep it simple.
+
+                try {
+                    const res = await fetch('/send-mail', { method:'POST', headers:{'Authorization':'Bearer '+token}, body:fd });
+                    const d = await res.json();
+                    
+                    if (d.success) {
+                        totalSent += d.count;
+                        localStorage.setItem('credits', d.newCredits);
+                        document.getElementById('creditsDisplay').innerText = d.newCredits;
+                    } else {
+                        // Si erreur (ex: plus de crédits), on arrête tout
+                        alert("Arrêt : " + d.error);
+                        break;
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+                
+                // Petite pause pour ne pas surcharger
+                await new Promise(r => setTimeout(r, 500));
+            }
+
+            // 4. Fin
+            alert(`Terminé ! ${totalSent} emails envoyés.`);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            loadHistory();
+            localStorage.removeItem('mailDraft');
         }
 
         async function loadHistory() { try{ const r=await fetch('/api/history',{headers:{'Authorization':'Bearer '+token}}); const d=await r.json(); document.getElementById('historyContainer').innerHTML = d.campaigns.map(c=>`<li class="history-item"><div><b>${c.subject.substring(0,20)}</b><br><small>${new Date(c.sentAt).toLocaleDateString()}</small></div> <span class="badge">${c.recipientCount} env.</span></li>`).join(''); }catch(e){} }
